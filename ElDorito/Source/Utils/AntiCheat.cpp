@@ -12,6 +12,7 @@ namespace Utils::AntiCheat
 	static int ticks = 0;
 	void AntiSpeed()
 	{
+		return;
 		HMODULE hMods[1024];
 		DWORD cbNeeded;
 		unsigned int i;
@@ -36,6 +37,7 @@ namespace Utils::AntiCheat
 	//TODO: Replace with a better check
 	BOOL CALLBACK AntiTrainer(HWND hwnd, LPARAM lParam)
 	{
+		return TRUE;
 		char title[80];
 		GetWindowText(hwnd, title, sizeof(title));
 		if (strcmp(title, "Halo Online Trainer") == 0)
@@ -53,6 +55,8 @@ namespace Utils::AntiCheat
 
 	void OnTickCheck()
 	{
+		return;
+
 		if (ticks > 1000)//Only check every so many ticks
 		{
 			ticks = 0;
