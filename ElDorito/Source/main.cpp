@@ -1,9 +1,10 @@
+#include "ThePringle/PringleCore.hpp"
+
 #include <windows.h>
 #include <IPTypes.h> // for proxy
 #include "Utils/VersionInfo.hpp"
 #include "ElDorito.hpp"
 #include "ElPatches.hpp"
-#include "ThePringle\PringleCore.hpp"
 
 /*LONG WINAPI TopLevelExceptionHandler(unsigned int code, EXCEPTION_POINTERS *pExceptionInfo)
 {
