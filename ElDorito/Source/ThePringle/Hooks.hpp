@@ -59,7 +59,7 @@ namespace Pringle
 
 	public:
 		template<typename T, typename... Args>
-		static void Call(Args... args)
+		static void Call(Args&&... args)
 		{
 			CallPremade<T>(T(args...));
 		}
