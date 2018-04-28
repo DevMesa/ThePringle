@@ -26,14 +26,14 @@ namespace Pringle
 
 		struct ModifySpeedMultiplier
 		{
-			float* Speed;
-			ModifySpeedMultiplier(float* speed) : Speed(speed) { }
+			float& Speed;
+			ModifySpeedMultiplier(float& speed) : Speed(speed) { }
 		};
 
 		struct ModifyGravityMultiplier
 		{
-			float* Gravity;
-			ModifyGravityMultiplier(float* gravity) : Gravity(gravity) { }
+			float& Gravity;
+			ModifyGravityMultiplier(float& gravity) : Gravity(gravity) { }
 		};
 	}
 }
