@@ -1,5 +1,3 @@
-#include "../ThePringle/Hooks.hpp"
-
 #include "GameEngineSettings.hpp"
 #include "../Blam/BitStream.hpp"
 #include "../Patch.hpp"
@@ -373,7 +371,6 @@ namespace
 			break;
 		}
 
-		Pringle::Hook::Call<Pringle::Hooks::ModifySpeedMultiplier>(&result);
 		return result;
 	}
 
@@ -413,8 +410,6 @@ namespace
 			result = 1.25f;
 			break;
 		}
-
-		Pringle::Hook::Call<Pringle::Hooks::ModifyGravityMultiplier>(&result);
 
 		return result;
 	}
