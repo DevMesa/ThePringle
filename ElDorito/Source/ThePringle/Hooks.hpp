@@ -58,8 +58,20 @@ namespace Pringle
 		}
 
 	public:
+		template<typename T, typename... Args>
+		static void Call(Args... args)
+		{
+			T hook(args...);
+
+			HookInfo<T>& info = GetHookInfo<T>();
+
+			for (auto&& func : info.Subscribed)
+				func.Function(hook);
+		}
+
+		// for if you want a hook result
 		template<typename T>
-		static void Call(const T&& hook)
+		static void CallPremade(const T&& hook)
 		{
 			HookInfo<T>& info = GetHookInfo<T>();
 
