@@ -30,6 +30,13 @@ namespace Pringle
 			ModifySpeedMultiplier(float& speed) : Speed(speed) { }
 		};
 
+		struct ModifyAcceleration
+		{
+			float& GroundAcceleration;
+			float& AirborneAcceleration;
+			ModifyAcceleration(float& ground_acceleration, float& airborn_acceleration) : GroundAcceleration(ground_acceleration), AirborneAcceleration(airborn_acceleration) { }
+		};
+
 		struct ModifyGravityMultiplier
 		{
 			float& Gravity;
