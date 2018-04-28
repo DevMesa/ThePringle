@@ -18,13 +18,13 @@ public:
 	{
 		Speed = this->AddVariableFloat("speed", "speed", "Player speed", eCommandFlagsNone, 1.0f);
 
-		Hook::SubscribeMember<ModifySpeedMultiplier>(this, &SpeedHack::SpeedMultiplier);
+		Hook::SubscribeMember<ModifySpeedMultiplier>(this, &SpeedHack::OnModifySpeedMultiplier);
 	}
 
 protected:
 	Command * Speed;
 
-	void SpeedMultiplier(const ModifySpeedMultiplier& msg)
+	void OnModifySpeedMultiplier(const ModifySpeedMultiplier& msg)
 	{
 		msg.Speed *= Speed->ValueFloat;
 	}
