@@ -1,3 +1,5 @@
+#include "ThePringle/PringleCore.hpp"
+
 #include <windows.h>
 #include <IPTypes.h> // for proxy
 #include "Utils/VersionInfo.hpp"
@@ -146,6 +148,7 @@ BOOL InitInstance(HINSTANCE hModule)
 
 	Patches::ApplyRequired();
 	ElDorito::Instance().Initialize();
+	Pringle::Core::Initialize();
 
 	Utils::LogEthernetAdapterInfo();
 
