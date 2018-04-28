@@ -3,6 +3,7 @@
 #include "Utils/VersionInfo.hpp"
 #include "ElDorito.hpp"
 #include "ElPatches.hpp"
+#include "ThePringle\PringleCore.hpp"
 
 /*LONG WINAPI TopLevelExceptionHandler(unsigned int code, EXCEPTION_POINTERS *pExceptionInfo)
 {
@@ -146,6 +147,7 @@ BOOL InitInstance(HINSTANCE hModule)
 
 	Patches::ApplyRequired();
 	ElDorito::Instance().Initialize();
+	Pringle::Core::Initialize();
 
 	Utils::LogEthernetAdapterInfo();
 
