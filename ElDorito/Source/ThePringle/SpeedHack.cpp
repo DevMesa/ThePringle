@@ -16,17 +16,20 @@ public:
 	SpeedHack() :
 		ModuleBase("pringle")
 	{
-		Speed = this->AddVariableFloat("speed", "speed", "Player speed", eCommandFlagsNone, 1.0f);
+		this->Factor = this->AddVariableFloat("speed.multiplier", "speed.multiplier", "Player speed multiplier", eCommandFlagsNone, 1.0f);
+		this->Enabled = this->AddVariableInt("speed.enabled", "speed.enabled", "Enable the hack", eCommandFlagsNone, 0);
 
 		Hook::SubscribeMember<ModifySpeedMultiplier>(this, &SpeedHack::OnModifySpeedMultiplier);
 	}
 
 protected:
-	Command * Speed;
+	Command* Factor;
+	Command* Enabled;
 
 	void OnModifySpeedMultiplier(const ModifySpeedMultiplier& msg)
 	{
-		msg.Speed *= Speed->ValueFloat;
+		if(this->Enabled->ValueInt != 0)
+			msg.Speed *= this->Factor->ValueFloat;
 	}
 };
 
