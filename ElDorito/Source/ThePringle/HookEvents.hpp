@@ -23,6 +23,18 @@ namespace Pringle
 			struct PreReset {};
 			struct PostReset {};
 		}
+
+		struct ModifySpeedMultiplier
+		{
+			float* Speed;
+			ModifySpeedMultiplier(float* speed) : Speed(speed) { }
+		};
+
+		struct ModifyGravityMultiplier
+		{
+			float* Gravity;
+			ModifyGravityMultiplier(float* gravity) : Gravity(gravity) { }
+		};
 	}
 }
 

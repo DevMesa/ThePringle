@@ -1,5 +1,8 @@
 #include "PringleCore.hpp"
 
-void Pringle::Core::Initialize()
+namespace Pringle
 {
+	void Core::Initialize()
+	{
+	}
 }

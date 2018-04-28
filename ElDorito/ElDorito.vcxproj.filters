@@ -554,6 +554,9 @@
     <ClCompile Include="Source\ThePringle\PringleCore.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ThePringle\SpeedHack.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Blam\BitStream.hpp">
