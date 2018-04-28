@@ -16,8 +16,7 @@ public:
 	SpeedHack() :
 		ModuleBase("pringle")
 	{
-		Speed = this->AddVariableFloat("speed", "speed", "Player speed", eCommandFlagsNone);
-		Speed->ValueFloat = Speed->DefaultValueFloat = 1.0f;
+		Speed = this->AddVariableFloat("speed", "speed", "Player speed", eCommandFlagsNone, 1.0f);
 
 		Hook::SubscribeMember<ModifySpeedMultiplier>(this, &SpeedHack::SpeedMultiplier);
 	}
