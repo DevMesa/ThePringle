@@ -830,7 +830,7 @@ namespace
 			}
 		}
 
-		Pringle::Hook::Call<Pringle::Hooks::ModifySpeedMultiplier>(&scale);
+		Pringle::Hook::Call<Pringle::Hooks::ModifySpeedMultiplier>(scale);
 
 		sub_7209E0(data, a2, a3, a4, a5, a6, a7, sneak);
 

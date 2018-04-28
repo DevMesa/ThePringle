@@ -27,7 +27,7 @@ protected:
 
 	void SpeedMultiplier(const ModifySpeedMultiplier& msg)
 	{
-		*msg.Speed *= Speed->ValueFloat;
+		msg.Speed *= Speed->ValueFloat;
 	}
 };
 
