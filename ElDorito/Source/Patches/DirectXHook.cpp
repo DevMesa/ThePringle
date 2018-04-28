@@ -1,3 +1,5 @@
+#include "../ThePringle/Hooks.hpp"
+
 #include "DirectXHook.hpp"
 #include <Windows.h>
 #include <detours.h>
@@ -76,6 +78,8 @@ namespace
 		viewport.Height = windowResolution[1];
 		device->SetViewport(&viewport);
 
+		Pringle::Hook::Call<Pringle::Hooks::DirectX::EndScene>(device);
+
 		// Update the web renderer
 		auto webRenderer = WebRenderer::GetInstance();
 		if (webRenderer->Initialized() && webRenderer->IsRendering())
@@ -101,10 +105,12 @@ namespace
 
 	HRESULT __stdcall ResetHook(LPDIRECT3DDEVICE9 device, D3DPRESENT_PARAMETERS *params)
 	{
+		Pringle::Hook::Call<Pringle::Hooks::DirectX::PreReset>();
 		auto webRenderer = WebRenderer::GetInstance();
 		webRenderer->PreReset();
 		auto result = origResetPtr(device, params);
 		webRenderer->PostReset();
+		Pringle::Hook::Call<Pringle::Hooks::DirectX::PostReset>();
 		return result;
 	}
 
