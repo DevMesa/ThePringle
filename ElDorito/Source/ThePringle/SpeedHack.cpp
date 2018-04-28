@@ -18,10 +18,8 @@ public:
 	{
 		Speed = this->AddVariableFloat("speed", "speed", "Player speed", eCommandFlagsNone);
 		Speed->ValueFloat = Speed->DefaultValueFloat = 1.0f;
-		
-		// the fuck, afaik, placeholders weren't required anymore...
-		// i might do a subscribe membe to make this shit easy
-		Hook::Subscribe<ModifySpeedMultiplier>(std::bind(&SpeedHack::SpeedMultiplier, this, std::placeholders::_1));
+
+		Hook::SubscribeMember<ModifySpeedMultiplier>(this, &SpeedHack::SpeedMultiplier);
 	}
 
 protected:

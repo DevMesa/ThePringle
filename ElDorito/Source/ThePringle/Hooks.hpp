@@ -61,17 +61,12 @@ namespace Pringle
 		template<typename T, typename... Args>
 		static void Call(Args... args)
 		{
-			T hook(args...);
-
-			HookInfo<T>& info = GetHookInfo<T>();
-
-			for (auto&& func : info.Subscribed)
-				func.Function(hook);
+			CallPremade<T>(T(args...));
 		}
 
 		// for if you want a hook result
 		template<typename T>
-		static void CallPremade(const T&& hook)
+		static void CallPremade(const T& hook)
 		{
 			HookInfo<T>& info = GetHookInfo<T>();
 
@@ -89,6 +84,12 @@ namespace Pringle
 			{
 				return left.Priority < right.Priority;
 			});
+		}
+
+		template<typename T, typename What>
+		static void SubscribeMember(What* self, void (What::*member_func)(const T&), float priority = HookPriority::Default)
+		{
+			Subscribe<T>(std::bind(member_func, self, std::placeholders::_1));
 		}
 	};
 }
