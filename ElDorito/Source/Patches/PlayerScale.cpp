@@ -837,6 +837,8 @@ namespace
 		data->GroundAcceleration *= std::pow(scale, kSpeedExp * kGroundAccelerationScale);
 		data->AirborneAcceleration *= std::pow(scale, kSpeedExp * kAirborneAccelerationScale);
 
+		Pringle::Hook::Call<Pringle::Hooks::ModifyAcceleration>(data->GroundAcceleration, data->AirborneAcceleration);
+
 		auto s = std::pow(scale, kSpeedExp);
 		data->Velocity.I *= s;
 		data->Velocity.J *= s;
