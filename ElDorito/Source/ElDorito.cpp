@@ -1,3 +1,6 @@
+// Pringle includes here at the top only
+#include "ThePringle/Hooks.hpp"
+
 #include "ElDorito.hpp"
 
 #include "Utils/Utils.hpp"
@@ -274,6 +277,7 @@ void ElDorito::Initialize()
 
 void ElDorito::Tick()
 {
+	Pringle::Hook::Call(Pringle::Hooks::PreTick());
 	Server::VariableSynchronization::Tick();
 	Server::Chat::Tick();
 	Patches::Tick();
@@ -299,6 +303,7 @@ void ElDorito::Tick()
 		Modules::CommandMap::Instance().ExecuteQueue();
 		executeCommandQueue = false;
 	}
+	Pringle::Hook::Call(Pringle::Hooks::PostTick());
 }
 
 namespace

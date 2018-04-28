@@ -5,11 +5,10 @@ namespace Pringle
 {
 	namespace Hooks
 	{
-		struct Tick
-		{
-			size_t Count;
-			Tick(size_t count) : Count(count) {}
-		};
+		struct PreTick { };
+		struct PostTick { };
+
+		typedef PostTick Tick; // don't care which way, default to after
 	}
 }
 #endif
