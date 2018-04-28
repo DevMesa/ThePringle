@@ -91,6 +91,9 @@
     <Filter Include="Discord">
       <UniqueIdentifier>{43beaab3-8907-457d-a9fd-de5498aeed9c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ThePringle">
+      <UniqueIdentifier>{e07c2c55-d726-4b22-a509-e3d5dd011560}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Blam\BitStream.cpp">
@@ -1257,6 +1260,12 @@
     <ClInclude Include="Source\Blam\Memory\DatumHandle.hpp" />
     <ClInclude Include="Source\Blam\Tags\Globals\ForgeGlobalsDefinition.hpp" />
     <ClInclude Include="Source\Patches\PlayerScale.hpp" />
+    <ClInclude Include="Source\ThePringle\Hooks.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\HookEvents.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Source\ElDorito.rc" />
