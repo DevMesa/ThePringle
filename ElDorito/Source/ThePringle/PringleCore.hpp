@@ -1,6 +1,7 @@
 #pragma once
-#ifndef __PRINGLE_CORE
-#define __PRINGLE_CORE
+
+#ifndef __PRINGLE_CORE_
+#define __PRINGLE_CORE_
 
 namespace Pringle
 {
@@ -10,4 +11,4 @@ namespace Pringle
 	}
 }
 
-#endif // !__PRINGLE_CORE
+#endif // !__PRINGLE_CORE_
