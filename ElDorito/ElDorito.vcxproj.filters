@@ -551,6 +551,9 @@
     <ClCompile Include="Source\Patches\DamageSystem.cpp" />
     <ClCompile Include="Source\Blam\Memory\DatumHandle.cpp" />
     <ClCompile Include="Source\Patches\PlayerScale.cpp" />
+    <ClCompile Include="Source\ThePringle\PringleCore.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Blam\BitStream.hpp">
@@ -1264,6 +1267,9 @@
       <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\HookEvents.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\PringleCore.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
   </ItemGroup>
