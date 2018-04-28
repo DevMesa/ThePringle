@@ -277,7 +277,7 @@ void ElDorito::Initialize()
 
 void ElDorito::Tick()
 {
-	Pringle::Hook::Call(Pringle::Hooks::PreTick());
+	Pringle::Hook::Call<Pringle::Hooks::PreTick>();
 	Server::VariableSynchronization::Tick();
 	Server::Chat::Tick();
 	Patches::Tick();
@@ -303,7 +303,7 @@ void ElDorito::Tick()
 		Modules::CommandMap::Instance().ExecuteQueue();
 		executeCommandQueue = false;
 	}
-	Pringle::Hook::Call(Pringle::Hooks::PostTick());
+	Pringle::Hook::Call<Pringle::Hooks::PostTick>();
 }
 
 namespace
