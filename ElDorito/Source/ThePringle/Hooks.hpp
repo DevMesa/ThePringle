@@ -90,6 +90,12 @@ namespace Pringle
 				return left.Priority < right.Priority;
 			});
 		}
+
+		template<typename T, typename What>
+		static void SubscribeMember(What* self, void (What::*member_func)(const T&), float priority = HookPriority::Default)
+		{
+			Subscribe<T>(std::bind(member_func, self, std::placeholders::_1));
+		}
 	};
 }
 
