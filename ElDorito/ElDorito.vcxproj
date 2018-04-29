@@ -142,6 +142,7 @@
     <ClCompile Include="Source\Server\Voting.cpp" />
     <ClCompile Include="Source\Server\VotingPackets.cpp" />
     <ClCompile Include="Source\Server\VotingSystem.cpp" />
+    <ClCompile Include="Source\ThePringle\Markers.cpp" />
     <ClCompile Include="Source\ThePringle\PringleCore.cpp" />
     <ClCompile Include="Source\ThePringle\SpeedHack.cpp" />
     <ClCompile Include="Source\ThirdParty\HttpRequest.cpp" />
