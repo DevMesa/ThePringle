@@ -142,6 +142,7 @@
     <ClCompile Include="Source\Server\Voting.cpp" />
     <ClCompile Include="Source\Server\VotingPackets.cpp" />
     <ClCompile Include="Source\Server\VotingSystem.cpp" />
+    <ClCompile Include="Source\ThePringle\Aimbot.cpp" />
     <ClCompile Include="Source\ThePringle\PringleCore.cpp" />
     <ClCompile Include="Source\ThePringle\SpeedHack.cpp" />
     <ClCompile Include="Source\ThirdParty\HttpRequest.cpp" />
@@ -343,6 +344,7 @@
     <ClInclude Include="Source\Server\VotingPackets.hpp" />
     <ClInclude Include="Source\Server\VotingSystem.hpp" />
     <ClInclude Include="Source\Settings.hpp" />
+    <ClInclude Include="Source\ThePringle\Aimbot.hpp" />
     <ClInclude Include="Source\ThePringle\HookEvents.hpp" />
     <ClInclude Include="Source\ThePringle\Hooks.hpp" />
     <ClInclude Include="Source\ThePringle\PringleCore.hpp" />

@@ -24,8 +24,9 @@ namespace
 	{
 		__asm
 		{
+
 			// Check if the player is using a mouse
-			mov edx, 0x244DE98
+			/*mov edx, 0x244DE98
 			mov edx, [edx]
 			test edx, edx
 			jnz controller
@@ -37,12 +38,12 @@ namespace
 			// Skip past magnetism angle code
 			mov edx, 0x58AA23
 			jmp edx
-
-		controller:
+			*/
+			controller :
 			// Load magnetism angle normally
 			movss xmm0, dword ptr[ebx + 0x388]
-			mov edx, 0x58AA1F
-			jmp edx
+				mov edx, 0x58AA1F
+				jmp edx
 		}
 	}
 

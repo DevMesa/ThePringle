@@ -3,6 +3,8 @@
 #define PRINGLE_HOOKEVENTS
 
 #include <d3d9.h>
+#include "Blam/Math/RealVector3D.hpp"
+#include <vector>
 
 namespace Pringle
 {
@@ -41,6 +43,43 @@ namespace Pringle
 		{
 			float& Gravity;
 			ModifyGravityMultiplier(float& gravity) : Gravity(gravity) { }
+		};
+
+		struct GetTargets
+		{
+			struct AimPosition
+			{
+				enum Enum
+				{
+					CenterMass,
+					Head
+				};
+			};
+
+			struct Target
+			{
+				Blam::Math::RealVector3D Position;
+				Blam::Math::RealVector3D Velocity; // projectiles will need this
+				AimPosition::Enum AimPart;			
+				float Priority;
+
+				Target(
+					const Blam::Math::RealVector3D& pos,
+					const Blam::Math::RealVector3D& vel,
+					AimPosition::Enum                aimpart   = AimPosition::CenterMass,
+					float                            priority  = 0.0f
+				) :
+					Position(pos),
+					Velocity(vel),
+					AimPart(aimpart),
+					Priority(priority)
+				{};
+			};
+
+			// reference to a list to save allocations
+			std::vector<Target>& Targets;
+
+			GetTargets(decltype(Targets) targets) : Targets(targets) {}
 		};
 	}
 }

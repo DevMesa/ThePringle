@@ -557,6 +557,9 @@
     <ClCompile Include="Source\ThePringle\SpeedHack.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ThePringle\Aimbot.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Blam\BitStream.hpp">
@@ -1276,6 +1279,9 @@
       <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\SpeedHack.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\Aimbot.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
   </ItemGroup>
