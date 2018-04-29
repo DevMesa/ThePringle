@@ -41,8 +41,13 @@ protected:
 
 	void OnModifyAcceleration(const ModifyAcceleration& msg)
 	{
-		if (this->Enabled->ValueInt != 0 && this->EnableAirAcceleration->ValueInt != 0)
-			msg.AirborneAcceleration = this->AirAcceleration->ValueFloat;
+		if (this->EnableAirAcceleration->ValueInt != 0)
+		{
+			if (this->Enabled->ValueInt != 0)
+				msg.AirborneAcceleration = this->AirAcceleration->ValueFloat * this->Factor->ValueFloat;
+			else
+				msg.AirborneAcceleration = msg.GroundAcceleration;
+		}
 	}
 };
 
