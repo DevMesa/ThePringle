@@ -42,6 +42,12 @@ namespace Pringle
 			float& Gravity;
 			ModifyGravityMultiplier(float& gravity) : Gravity(gravity) { }
 		};
+
+		struct ModifyMarkerVisibility
+		{
+			bool& Visibility;
+			ModifyMarkerVisibility(bool& visibility) : Visibility(visibility) { }
+		};
 	}
 }
 
