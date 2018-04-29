@@ -558,6 +558,19 @@
       <Filter>ThePringle</Filter>
     </ClCompile>
     <ClCompile Include="Source\ThePringle\Aimbot.cpp">
+    <ClCompile Include="Source\ThePringle\Markers.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ThePringle\Quaternion.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ThePringle\Vector.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ThePringle\EulerAngle.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ThePringle\QAngle.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1282,6 +1295,16 @@
       <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\Aimbot.hpp">
+    <ClInclude Include="Source\ThePringle\Vector.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\Quaternion.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\EulerAngle.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\QAngle.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
   </ItemGroup>

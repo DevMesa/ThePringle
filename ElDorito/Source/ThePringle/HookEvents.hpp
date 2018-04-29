@@ -44,7 +44,7 @@ namespace Pringle
 			float& Gravity;
 			ModifyGravityMultiplier(float& gravity) : Gravity(gravity) { }
 		};
-
+		
 		struct GetTargets
 		{
 			struct AimPosition
@@ -80,6 +80,12 @@ namespace Pringle
 			std::vector<Target>& Targets;
 
 			GetTargets(decltype(Targets) targets) : Targets(targets) {}
+		};
+		
+		struct ModifyMarkerVisibility
+		{
+			bool& Visibility;
+			ModifyMarkerVisibility(bool& visibility) : Visibility(visibility) { }
 		};
 	}
 }
