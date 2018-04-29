@@ -4,9 +4,6 @@ using namespace Pringle;
 using namespace Pringle::Hooks;
 using namespace Modules;
 
-// no one else needs our class, so we don't have to put it in the header.
-// improves compile times and other stuff
-
 SpeedHack::SpeedHack() : ModuleBase("pringle")
 {
 	this->Factor = this->AddVariableFloat("speed.multiplier", "speed.multiplier", "Player speed multiplier", eCommandFlagsArchived, 1.0f);
