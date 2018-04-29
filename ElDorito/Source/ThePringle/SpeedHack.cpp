@@ -44,7 +44,7 @@ protected:
 		if (this->EnableAirAcceleration->ValueInt != 0)
 		{
 			if (this->Enabled->ValueInt != 0)
-				msg.AirborneAcceleration = this->AirAcceleration->ValueFloat * this->Factor->ValueFloat;
+				msg.AirborneAcceleration = this->AirAcceleration->ValueFloat;
 			else
 				msg.AirborneAcceleration = msg.GroundAcceleration;
 		}
