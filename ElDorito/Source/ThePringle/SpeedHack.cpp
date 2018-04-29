@@ -27,6 +27,11 @@ void SpeedHack::OnModifySpeedMultiplier(const ModifySpeedMultiplier & msg)
 
 void SpeedHack::OnModifyAcceleration(const ModifyAcceleration & msg)
 {
-	if (this->Enabled->ValueInt != 0 && this->EnableAirAcceleration->ValueInt != 0)
-		msg.AirborneAcceleration = this->AirAcceleration->ValueFloat;
+	if (this->EnableAirAcceleration->ValueInt != 0)
+	{
+		if (this->Enabled->ValueInt != 0)
+			msg.AirborneAcceleration = this->AirAcceleration->ValueFloat;
+		else
+			msg.AirborneAcceleration = msg.GroundAcceleration;
+	}
 }
