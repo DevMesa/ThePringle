@@ -551,26 +551,28 @@
     <ClCompile Include="Source\Patches\DamageSystem.cpp" />
     <ClCompile Include="Source\Blam\Memory\DatumHandle.cpp" />
     <ClCompile Include="Source\Patches\PlayerScale.cpp" />
-    <ClCompile Include="Source\ThePringle\PringleCore.cpp">
-      <Filter>ThePringle</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ThePringle\SpeedHack.cpp">
-      <Filter>ThePringle</Filter>
-    </ClCompile>
     <ClCompile Include="Source\ThePringle\Aimbot.cpp">
-    <ClCompile Include="Source\ThePringle\Markers.cpp">
-      <Filter>ThePringle</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ThePringle\Quaternion.cpp">
-      <Filter>ThePringle</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ThePringle\Vector.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
     <ClCompile Include="Source\ThePringle\EulerAngle.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ThePringle\Markers.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ThePringle\PringleCore.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
     <ClCompile Include="Source\ThePringle\QAngle.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ThePringle\Quaternion.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ThePringle\SpeedHack.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ThePringle\Vector.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1282,29 +1284,31 @@
     <ClInclude Include="Source\Blam\Memory\DatumHandle.hpp" />
     <ClInclude Include="Source\Blam\Tags\Globals\ForgeGlobalsDefinition.hpp" />
     <ClInclude Include="Source\Patches\PlayerScale.hpp" />
-    <ClInclude Include="Source\ThePringle\Hooks.hpp">
-      <Filter>ThePringle</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ThePringle\HookEvents.hpp">
-      <Filter>ThePringle</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ThePringle\PringleCore.hpp">
-      <Filter>ThePringle</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ThePringle\SpeedHack.hpp">
-      <Filter>ThePringle</Filter>
-    </ClInclude>
     <ClInclude Include="Source\ThePringle\Aimbot.hpp">
-    <ClInclude Include="Source\ThePringle\Vector.hpp">
-      <Filter>ThePringle</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ThePringle\Quaternion.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\EulerAngle.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
+    <ClInclude Include="Source\ThePringle\HookEvents.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\Hooks.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\PringleCore.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
     <ClInclude Include="Source\ThePringle\QAngle.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\Quaternion.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\SpeedHack.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\Vector.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
   </ItemGroup>
