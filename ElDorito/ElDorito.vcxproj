@@ -346,6 +346,7 @@
     <ClInclude Include="Source\ThePringle\HookEvents.hpp" />
     <ClInclude Include="Source\ThePringle\Hooks.hpp" />
     <ClInclude Include="Source\ThePringle\PringleCore.hpp" />
+    <ClInclude Include="Source\ThePringle\SpeedHack.hpp" />
     <ClInclude Include="Source\ThirdParty\dirent.h" />
     <ClInclude Include="Source\ThirdParty\HttpRequest.hpp" />
     <ClInclude Include="Source\ThirdParty\rapidjson\allocators.h" />

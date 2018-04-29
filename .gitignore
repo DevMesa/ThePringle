@@ -232,3 +232,6 @@ FakesAssemblies/
 !SDL2test.lib
 !custom_menu.exe
 !libs/boost-1.60/include/boost/**
+
+#Weird temp folder created when you delete large strings
+enc_temp_folder/*
