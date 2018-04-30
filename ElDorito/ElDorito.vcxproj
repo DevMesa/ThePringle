@@ -355,6 +355,7 @@
     <ClInclude Include="Source\ThePringle\HookEvents.hpp" />
     <ClInclude Include="Source\ThePringle\Hooks.hpp" />
     <ClInclude Include="Source\ThePringle\PringleCore.hpp" />
+    <ClInclude Include="Source\ThePringle\Properties.hpp" />
     <ClInclude Include="Source\ThePringle\QAngle.hpp" />
     <ClInclude Include="Source\ThePringle\Quaternion.hpp" />
     <ClInclude Include="Source\ThePringle\ServiceTagMod.hpp" />

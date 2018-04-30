@@ -1317,6 +1317,9 @@
     <ClInclude Include="Source\ThePringle\ServiceTagMod.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
+    <ClInclude Include="Source\ThePringle\Properties.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Source\ElDorito.rc" />
