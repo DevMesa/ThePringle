@@ -1,6 +1,7 @@
 #include "PringleCore.hpp"
 #include "SpeedHack.hpp"
 #include "Aimbot.hpp"
+#include "ServiceTagMod.hpp"
 
 namespace Pringle
 {
@@ -8,5 +9,6 @@ namespace Pringle
 	{
 		SpeedHack::Instance();
 		Aimbot::Initalize();
+		ServiceTagMod::Instance();
 	}
 }
