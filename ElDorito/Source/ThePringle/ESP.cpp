@@ -187,6 +187,7 @@ namespace Pringle
 		Enabled = this->AddVariableInt("esp.enabled", "esp.enabled", "Enables ESP", eCommandFlagsArchived, 0);
 
 		Hook::SubscribeMember<DirectX::EndScene>(this, &ESP::OnEndScene);
+		Hook::SubscribeMember<Hooks::PreTick>(this, &ESP::OnPreTick);
 
 		Patches::Core::OnMapLoaded([](auto map) {
 			isMainMenu = !(std::string(map).find("mainmenu") == std::string::npos);
@@ -266,7 +267,7 @@ namespace Pringle
 		headPos->z = pos.K;
 	}
 
-	static void GetLocalPlayerUp(D3DXVECTOR3* up) 
+	static void GetLocalPlayerUp(D3DXVECTOR3* up)
 	{
 		auto lph = Players::GetLocalPlayer(0); // get local player handle
 		if (!lph || lph == DatumHandle::Null)
@@ -360,7 +361,7 @@ namespace Pringle
 		visible = pos.ToScreen(viewpos, viewang, 100_deg, width, height, screenX, screenY);
 	}
 
-	static void ToScreen(LPDIRECT3DDEVICE9 device, const float x, const float y, const float z, float& screenX, float& screenY, bool& visible) 
+	static void ToScreen(LPDIRECT3DDEVICE9 device, const float x, const float y, const float z, float& screenX, float& screenY, bool& visible)
 
 	{
 		D3DXVECTOR2 d3dscreen;
@@ -373,6 +374,56 @@ namespace Pringle
 		screenY = d3dscreen.y;
 	}
 
+	void ESP::Draw(const DirectX::EndScene & msg, Blam::Objects::ObjectBase* unit, uint32_t color)
+	{
+		auto& players = Players::GetPlayers();
+		auto& localPlayerIndex = Players::GetLocalPlayer(0);
+		auto localPlayer = players.Get(localPlayerIndex);
+		
+		float screenX = .0f, screenY = .0f;
+		{
+			auto pos = unit->Position;
+			Halo::project_t project;
+			project.x = pos.I;
+			project.y = pos.J;
+			project.z = pos.K;
+			Halo::WorldToScreen(&project);
+			screenX = project.projected_x;
+			screenY = project.projected_y;
+		}
+
+		{
+			DrawRect(msg.Device, screenX, screenY, 5, 5, color);
+
+			{
+				static Halo::color_t white = { 1.0f, 1.0f, 1.0f };
+				Halo::rect_t area = { screenX, screenY, screenX + 100, screenY + 100 };
+				//Halo::c_rasterizer_draw_string draw_string;
+				//Halo::c_font_cache_mt_safe font_cache;
+
+				//draw_string.set_color(&white);
+				//draw_string.set_style(0);
+				//draw_string.set_draw_area(&area);
+				//draw_string.draw();
+			}
+		}
+	}
+
+	void ESP::DrawPlayers(const DirectX::EndScene & msg)
+	{
+		for (auto it = ally_player_units.begin(); it != ally_player_units.end(); ++it) {
+			auto unit = *it;
+			uint32_t color = D3DCOLOR_RGBA(100, 100, 255, 255);
+			this->Draw(msg, unit, color);
+		}
+
+		for (auto it = enemy_player_units.begin(); it != enemy_player_units.end(); ++it) {
+			auto unit = *it;
+			uint32_t color = D3DCOLOR_RGBA(255, 100, 100, 255);
+			this->Draw(msg, unit, color);
+		}
+	}
+
 	void ESP::OnEndScene(const DirectX::EndScene & msg)
 	{
 		if (isMainMenu)
@@ -382,45 +433,38 @@ namespace Pringle
 		ModuleSettings::Instance().GetScreenResolution(&width, &height);
 		float fwidth = (float)width, fheight = (float)height;
 
-		auto& players = Objects::GetObjects();
-		for (auto it = players.begin(); it != players.end(); ++it) {
-			auto unit = it->Data;
-			if (!unit)
-				continue;
+		this->DrawPlayers(msg);
+	}
 
-			auto pos = unit->Position;
+	void ESP::OnPreTick(const Hooks::PreTick & msg)
+	{
+		{
+			ally_player_units.clear();
+			enemy_player_units.clear();
 
-			bool visible = false;
-			float screenX = .0f, screenY = .0f;
+			auto& players = Players::GetPlayers();
+			auto& localPlayerIndex = Players::GetLocalPlayer(0);
+			auto localPlayer = players.Get(localPlayerIndex);
 
-			//ToScreenAshleigh(msg.Device, pos.I, pos.J, pos.K, screenX, screenY, visible);
-			//ToScreen(msg.Device, pos.I, pos.J, pos.K, screenX, screenY, visible);
+			for (auto it = players.begin(); it != players.end(); ++it) {
+				const auto& unitObjectIndex = it->SlaveUnit.Handle;
+				if (unitObjectIndex == -1)
+					continue;
 
-			{
-				Halo::project_t project;
-				project.x = pos.I;
-				project.y = pos.J;
-				project.z = pos.K;
-				Halo::WorldToScreen(&project);
-				screenX = project.projected_x;
-				screenY = project.projected_y;
-			}
+				if (localPlayer->SlaveUnit.Handle == unitObjectIndex)
+					continue;
 
-			//if (visible)
-			{
-				DrawRect(msg.Device, screenX, screenY, 5, 5, D3DCOLOR_RGBA(0, 255, 0, 255));
+				const auto& unit = Objects::Get(unitObjectIndex);
+				if (!unit)
+					continue;
 
-				{
-					static Halo::color_t white = { 1.0f, 1.0f, 1.0f };
-					Halo::rect_t area = { screenX, screenY, screenX + 100, screenY + 100 };
-					//Halo::c_rasterizer_draw_string draw_string;
-					//Halo::c_font_cache_mt_safe font_cache;
+				if (it->DeadSlaveUnit)
+					continue;
 
-					//draw_string.set_color(&white);
-					//draw_string.set_style(0);
-					//draw_string.set_draw_area(&area);
-					//draw_string.draw();
-				}
+				if (it->Properties.TeamIndex != localPlayer->Properties.TeamIndex)
+					enemy_player_units.push_back(unit);
+				else
+					ally_player_units.push_back(unit);
 			}
 		}
 	}
