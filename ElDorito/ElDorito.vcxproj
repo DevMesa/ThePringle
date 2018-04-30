@@ -148,6 +148,7 @@
     <ClCompile Include="Source\ThePringle\PringleCore.cpp" />
     <ClCompile Include="Source\ThePringle\QAngle.cpp" />
     <ClCompile Include="Source\ThePringle\Quaternion.cpp" />
+    <ClCompile Include="Source\ThePringle\ServiceTagMod.cpp" />
     <ClCompile Include="Source\ThePringle\SpeedHack.cpp" />
     <ClCompile Include="Source\ThePringle\Vector.cpp" />
     <ClCompile Include="Source\ThirdParty\HttpRequest.cpp" />
@@ -356,6 +357,7 @@
     <ClInclude Include="Source\ThePringle\PringleCore.hpp" />
     <ClInclude Include="Source\ThePringle\QAngle.hpp" />
     <ClInclude Include="Source\ThePringle\Quaternion.hpp" />
+    <ClInclude Include="Source\ThePringle\ServiceTagMod.hpp" />
     <ClInclude Include="Source\ThePringle\SpeedHack.hpp" />
     <ClInclude Include="Source\ThePringle\Vector.hpp" />
     <ClInclude Include="Source\ThirdParty\dirent.h" />
