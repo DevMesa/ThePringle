@@ -61,14 +61,11 @@ namespace Halo
 		static const uint32_t world2screen_addr = 0xAD2360;
 
 		uint8_t** view_ptr = (uint8_t**)current_view_addr;
-		//uint8_t* old_view = *view_ptr;
 		*view_ptr = (uint8_t*)0x050DEE10;
 
 		typedef void(__thiscall *world2screen_func)(project_t*, float);
 		world2screen_func world2screen = reinterpret_cast<world2screen_func>(world2screen_addr);
 		world2screen(project, 1.0f);
-
-		//*view_ptr = old_view;
 	}
 
 	class c_font_cache_mt_safe
@@ -151,28 +148,6 @@ namespace Halo
 	
 	private:
 		uint8_t junk[0x4000]; //TODO
-
-		/*uint32_t vtable; //0x0000
-		char pad_0004[4]; //0x0004
-		uint32_t style_id; //0x0008 text style id, can be 0..10
-		uint32_t N00000004; //0x000C
-		uint32_t N00000005; //0x0010
-		uint32_t N00000006; //0x0014
-		char pad_0018[4]; //0x0018
-		float color_r; //0x001C
-		float color_g; //0x0020
-		float color_b; //0x0024
-		float N0000000B; //0x0028
-		float N0000000C; //0x002C
-		char pad_0030[12]; //0x0030
-		float N00000010; //0x003C
-		float N00000011; //0x0040
-		char pad_0044[36]; //0x0044
-		float N0000001B; //0x0068
-		float N00000024; //0x006C
-		float N0000001C; //0x0070
-		float N00000027; //0x0074
-		char pad_0078[16]; //0x0078*/
 	};
 }
 
@@ -267,111 +242,15 @@ namespace Pringle
 		headPos->z = pos.K;
 	}
 
-	static void GetLocalPlayerUp(D3DXVECTOR3* up)
+	void ToScreen(Vector& pos, Vector& out)
 	{
-		auto lph = Players::GetLocalPlayer(0); // get local player handle
-		if (!lph || lph == DatumHandle::Null)
-			return;
-
-		auto pl = Players::GetPlayers().Get(lph); // get player handle
-		if (!pl)
-			return;
-
-		auto uh = pl->SlaveUnit.Handle;
-		if (uh == -1)
-			return;
-
-		auto unit = Objects::Get(uh);
-		if (!unit)
-			return;
-
-		up->x = unit->Up.I;
-		up->y = unit->Up.J;
-		up->z = unit->Up.K;
-	}
-
-	static void VecTransformCoordinate(D3DXVECTOR4* out, const D3DXVECTOR3* target, const D3DXMATRIX* matrix)
-	{
-		out->x = (target->x * matrix->m[0][0]) + (target->y * matrix->m[1][0]) + (target->z * matrix->m[2][0]) + matrix->m[3][0];
-		out->y = (target->x * matrix->m[0][1]) + (target->y * matrix->m[1][1]) + (target->z * matrix->m[2][1]) + matrix->m[3][1];
-		out->z = (target->x * matrix->m[0][2]) + (target->y * matrix->m[1][2]) + (target->z * matrix->m[2][2]) + matrix->m[3][2];
-		out->w = (target->x * matrix->m[0][3]) + (target->y * matrix->m[1][3]) + (target->z * matrix->m[2][3]) + matrix->m[3][3];
-	}
-
-	static void ToScreen(LPDIRECT3DDEVICE9 device, const D3DXVECTOR3& target, D3DXVECTOR2& screen, bool& visible)
-	{
-		D3DXVECTOR4 output;
-
-		D3DVIEWPORT9 viewport;
-
-		device->GetViewport(&viewport);
-
-		const float fwidth = (float)viewport.Width;
-		const float fheight = (float)viewport.Height;
-
-		D3DXMATRIX view, proj, world, wvm;
-
-		D3DXVECTOR3 head, cam, up, angs;
-		GetLocalPlayerHeadPosition(&head);
-		GetCameraPosition(&cam);
-		GetCameraUp(&up);
-		GetLocalPlayerViewAngles(&angs);
-
-		D3DXMatrixLookAtLH(&view, &cam, &angs, &D3DXVECTOR3(0, 0, 1));
-		D3DXMatrixPerspectiveFovLH(&proj, (float)(D3DX_PI / 4.f), fwidth / fheight, 1.f, 1000.f);
-
-		wvm = view * proj;
-
-		VecTransformCoordinate(&output, &target, &wvm);
-
-		output.x /= output.w;
-		output.y /= output.w;
-
-		output.x = fwidth * (output.x + 1.f) / 2.f;
-		output.y = fheight * (1.f - ((output.y + 1.f) / 2.f));
-
-		screen.x = output.x;
-		screen.y = output.y;
-
-		visible = !(output.x < 0 || output.y < 0 || output.x > fwidth || output.y > fheight);
-	}
-
-	static void ToScreenAshleigh(LPDIRECT3DDEVICE9 device, const float x, const float y, const float z, float& screenX, float& screenY, bool& visible)
-	{
-		D3DVIEWPORT9 viewport;
-
-		device->GetViewport(&viewport);
-
-		D3DXVECTOR3 head, cam, up, angs;
-		GetLocalPlayerHeadPosition(&head);
-		GetCameraPosition(&cam);
-		GetCameraUp(&up);
-		GetLocalPlayerViewAngles(&angs);
-
-		const float width = (float)viewport.Width;
-		const float height = (float)viewport.Height;
-
-		Angle yaw = Angle::Radians(-angs.x * 0.5f) + 135_deg;
-		Angle pitch = Angle::Radians(-angs.y * 0.5f);
-
-		Vector viewpos = cam;
-		QAngle viewang(pitch, yaw, Angle::Radians(0));
-		Vector pos = Vector(x, y, z);
-
-		visible = pos.ToScreen(viewpos, viewang, 100_deg, width, height, screenX, screenY);
-	}
-
-	static void ToScreen(LPDIRECT3DDEVICE9 device, const float x, const float y, const float z, float& screenX, float& screenY, bool& visible)
-
-	{
-		D3DXVECTOR2 d3dscreen;
-		D3DXVECTOR3 d3dtarget = D3DXVECTOR3(x, y, z);
-
-
-		ToScreen(device, d3dtarget, d3dscreen, visible);
-
-		screenX = d3dscreen.x;
-		screenY = d3dscreen.y;
+		Halo::project_t project;
+		project.x = pos.X;
+		project.y = pos.Y;
+		project.z = pos.Z;
+		Halo::WorldToScreen(&project);
+		out.X = project.projected_x;
+		out.Y = project.projected_y;
 	}
 
 	void ESP::Draw(const DirectX::EndScene & msg, Blam::Objects::ObjectBase* unit, uint32_t color)
@@ -380,33 +259,10 @@ namespace Pringle
 		auto& localPlayerIndex = Players::GetLocalPlayer(0);
 		auto localPlayer = players.Get(localPlayerIndex);
 		
-		float screenX = .0f, screenY = .0f;
-		{
-			auto pos = unit->Position;
-			Halo::project_t project;
-			project.x = pos.I;
-			project.y = pos.J;
-			project.z = pos.K;
-			Halo::WorldToScreen(&project);
-			screenX = project.projected_x;
-			screenY = project.projected_y;
-		}
+		Vector pos = unit->Position, screen;
+		ToScreen(pos, screen);
 
-		{
-			DrawRect(msg.Device, screenX, screenY, 5, 5, color);
-
-			{
-				static Halo::color_t white = { 1.0f, 1.0f, 1.0f };
-				Halo::rect_t area = { screenX, screenY, screenX + 100, screenY + 100 };
-				//Halo::c_rasterizer_draw_string draw_string;
-				//Halo::c_font_cache_mt_safe font_cache;
-
-				//draw_string.set_color(&white);
-				//draw_string.set_style(0);
-				//draw_string.set_draw_area(&area);
-				//draw_string.draw();
-			}
-		}
+		DrawRect(msg.Device, screen.X, screen.Y, 5, 5, color);
 	}
 
 	void ESP::DrawPlayers(const DirectX::EndScene & msg)
@@ -438,34 +294,32 @@ namespace Pringle
 
 	void ESP::OnPreTick(const Hooks::PreTick & msg)
 	{
-		{
-			ally_player_units.clear();
-			enemy_player_units.clear();
+		ally_player_units.clear();
+		enemy_player_units.clear();
 
-			auto& players = Players::GetPlayers();
-			auto& localPlayerIndex = Players::GetLocalPlayer(0);
-			auto localPlayer = players.Get(localPlayerIndex);
+		auto& players = Players::GetPlayers();
+		auto& localPlayerIndex = Players::GetLocalPlayer(0);
+		auto localPlayer = players.Get(localPlayerIndex);
 
-			for (auto it = players.begin(); it != players.end(); ++it) {
-				const auto& unitObjectIndex = it->SlaveUnit.Handle;
-				if (unitObjectIndex == -1)
-					continue;
+		for (auto it = players.begin(); it != players.end(); ++it) {
+			const auto& unitObjectIndex = it->SlaveUnit.Handle;
+			if (unitObjectIndex == -1)
+				continue;
 
-				if (localPlayer->SlaveUnit.Handle == unitObjectIndex)
-					continue;
+			if (localPlayer->SlaveUnit.Handle == unitObjectIndex)
+				continue;
 
-				const auto& unit = Objects::Get(unitObjectIndex);
-				if (!unit)
-					continue;
+			const auto& unit = Objects::Get(unitObjectIndex);
+			if (!unit)
+				continue;
 
-				if (it->DeadSlaveUnit)
-					continue;
+			if (it->DeadSlaveUnit)
+				continue;
 
-				if (it->Properties.TeamIndex != localPlayer->Properties.TeamIndex)
-					enemy_player_units.push_back(unit);
-				else
-					ally_player_units.push_back(unit);
-			}
+			if (it->Properties.TeamIndex != localPlayer->Properties.TeamIndex)
+				enemy_player_units.push_back(unit);
+			else
+				ally_player_units.push_back(unit);
 		}
 	}
 }
