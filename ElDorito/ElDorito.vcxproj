@@ -145,6 +145,8 @@
     <ClCompile Include="Source\ThePringle\Aimbot.cpp" />
     <ClCompile Include="Source\ThePringle\ESP.cpp" />
     <ClCompile Include="Source\ThePringle\EulerAngle.cpp" />
+    <ClCompile Include="Source\ThePringle\Markers.cpp" />
+    <ClCompile Include="Source\ThePringle\NoclipHack.cpp" />
     <ClCompile Include="Source\ThePringle\PringleCore.cpp" />
     <ClCompile Include="Source\ThePringle\QAngle.cpp" />
     <ClCompile Include="Source\ThePringle\Quaternion.cpp" />
@@ -355,6 +357,7 @@
     <ClInclude Include="Source\ThePringle\EulerAngle.hpp" />
     <ClInclude Include="Source\ThePringle\HookEvents.hpp" />
     <ClInclude Include="Source\ThePringle\Hooks.hpp" />
+    <ClInclude Include="Source\ThePringle\NoclipHack.hpp" />
     <ClInclude Include="Source\ThePringle\PringleCore.hpp" />
     <ClInclude Include="Source\ThePringle\QAngle.hpp" />
     <ClInclude Include="Source\ThePringle\Quaternion.hpp" />

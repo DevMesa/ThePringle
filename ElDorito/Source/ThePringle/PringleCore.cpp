@@ -3,6 +3,7 @@
 #include "ESP.hpp"
 #include "Aimbot.hpp"
 #include "ServiceTagMod.hpp"
+#include "NoclipHack.hpp"
 
 namespace Pringle
 {
@@ -12,5 +13,6 @@ namespace Pringle
 		Aimbot::Initalize();
 		ESP::Instance();
 		ServiceTagMod::Instance();
+		NoclipHack::Instance();
 	}
 }
