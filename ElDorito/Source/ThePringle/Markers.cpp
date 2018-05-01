@@ -4,8 +4,8 @@
 #include "../Blam/BlamPlayers.hpp"
 #include "../Patch.hpp"
 
-//#define __PRINGLE_NOCLIPHACK__
-#ifdef __PRINGLE_NOCLIPHACK__
+//#define __PRINGLE_MARKERS__
+#ifdef __PRINGLE_MARKERS__
 uint32_t marker_vis_hook(uint8_t* thisptr) 
 {
 	bool visibility = false;
