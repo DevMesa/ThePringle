@@ -24,7 +24,7 @@ namespace Pringle
 		Vector(other.x, other.y, other.z)
 	{}
 
-	inline float Vector::LengthSequared() const
+	/*inline*/ float Vector::LengthSequared() const
 	{
 		return this->X * this->X + this->Y * this->Y + this->Z * this->Z;
 	}

@@ -557,7 +557,7 @@
     <ClCompile Include="Source\ThePringle\EulerAngle.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ThePringle\Markers.cpp">
+    <ClCompile Include="Source\ThePringle\Quaternion.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
     <ClCompile Include="Source\ThePringle\PringleCore.cpp">
@@ -579,6 +579,7 @@
       <Filter>ThePringle</Filter>
     </ClCompile>
     <ClCompile Include="Source\ThePringle\NoclipHack.cpp">
+    <ClCompile Include="Source\ThePringle\ESP.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1296,7 +1297,7 @@
     <ClInclude Include="Source\ThePringle\EulerAngle.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThePringle\HookEvents.hpp">
+    <ClInclude Include="Source\ThePringle\QAngle.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\Hooks.hpp">
@@ -1308,7 +1309,7 @@
     <ClInclude Include="Source\ThePringle\QAngle.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThePringle\Quaternion.hpp">
+    <ClInclude Include="Source\ThePringle\ESP.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\SpeedHack.hpp">
@@ -1323,6 +1324,8 @@
     <ClInclude Include="Source\ThePringle\NoclipHack.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
+    <ClInclude Include="Source\ThePringle\HookEvents.hpp" />
+    <ClInclude Include="Source\ThePringle\Quaternion.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Source\ElDorito.rc" />
