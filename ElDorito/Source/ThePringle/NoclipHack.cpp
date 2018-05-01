@@ -40,12 +40,14 @@ void NoclipHack::OnPreTick(const PreTick & msg)
 
 	bool Enabled = this->Enabled->ValueInt != 0;
 
-	if (Enabled != LastTickEnabled) {
+	if (Enabled != LastTickEnabled) 
+	{
 		object_set_havok_flags(player->SlaveUnit, 0); // enable collisions, only done once when mod disabled
 		LastTickEnabled = Enabled;
 	}
-
-	if (Enabled) {
+	
+	if (Enabled) 
+	{
 		auto havokComponents = *(Blam::DataArray<Blam::DatumBase>**)0x02446080;
 		auto havokComponent = (uint8_t*)havokComponents->Get(unitObject->HavokComponent);
 		if (!havokComponent)
