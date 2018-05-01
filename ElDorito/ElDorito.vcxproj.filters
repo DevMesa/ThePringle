@@ -578,6 +578,9 @@
     <ClCompile Include="Source\ThePringle\ServiceTagMod.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ThePringle\NoclipHack.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Blam\BitStream.hpp">
@@ -1315,6 +1318,9 @@
       <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\ServiceTagMod.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\NoclipHack.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
   </ItemGroup>

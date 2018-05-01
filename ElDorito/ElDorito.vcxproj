@@ -145,6 +145,7 @@
     <ClCompile Include="Source\ThePringle\Aimbot.cpp" />
     <ClCompile Include="Source\ThePringle\EulerAngle.cpp" />
     <ClCompile Include="Source\ThePringle\Markers.cpp" />
+    <ClCompile Include="Source\ThePringle\NoclipHack.cpp" />
     <ClCompile Include="Source\ThePringle\PringleCore.cpp" />
     <ClCompile Include="Source\ThePringle\QAngle.cpp" />
     <ClCompile Include="Source\ThePringle\Quaternion.cpp" />
@@ -354,6 +355,7 @@
     <ClInclude Include="Source\ThePringle\EulerAngle.hpp" />
     <ClInclude Include="Source\ThePringle\HookEvents.hpp" />
     <ClInclude Include="Source\ThePringle\Hooks.hpp" />
+    <ClInclude Include="Source\ThePringle\NoclipHack.hpp" />
     <ClInclude Include="Source\ThePringle\PringleCore.hpp" />
     <ClInclude Include="Source\ThePringle\QAngle.hpp" />
     <ClInclude Include="Source\ThePringle\Quaternion.hpp" />
@@ -457,7 +459,7 @@
     <Platform>Win32</Platform>
     <ProjectName>ElDorito</ProjectName>
     <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
