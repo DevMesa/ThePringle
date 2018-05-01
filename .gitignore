@@ -235,3 +235,5 @@ FakesAssemblies/
 
 #Weird temp folder created when you delete large strings
 enc_temp_folder/*
+
+*.vc.db
