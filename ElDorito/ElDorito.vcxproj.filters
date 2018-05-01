@@ -578,10 +578,13 @@
     <ClCompile Include="Source\ThePringle\ServiceTagMod.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
-	<ClCompile Include="Source\ThePringle\NoclipHack.cpp">
+    <ClCompile Include="Source\ThePringle\NoclipHack.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
     <ClCompile Include="Source\ThePringle\ESP.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ThePringle\Markers.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
   </ItemGroup>
