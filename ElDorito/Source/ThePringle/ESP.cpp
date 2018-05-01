@@ -231,7 +231,6 @@ namespace Pringle
 		});
 
 		// hook
-		/*
 		Halo::old = reinterpret_cast<Halo::RayTrace_t>(0x6D7190);
 		DetourTransactionBegin();
 		DetourUpdateThread(GetCurrentThread());
@@ -370,6 +369,8 @@ namespace Pringle
 
 	void ESP::OnEndScene(const DirectX::EndScene & msg)
 	{
+		return;
+
 		if (isMainMenu)
 			return;
 
