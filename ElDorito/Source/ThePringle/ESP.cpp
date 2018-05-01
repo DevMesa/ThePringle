@@ -14,6 +14,9 @@
 #include "QAngle.hpp"
 
 #include <d3dx9math.h>
+#include <fstream>
+#include <detours.h>
+#include <mutex>
 
 using namespace Pringle;
 using namespace Pringle::Hooks;
@@ -149,6 +152,63 @@ namespace Halo
 	private:
 		uint8_t junk[0x4000]; //TODO
 	};
+
+	struct RayTraceResult
+	{
+		uint32_t dword0;
+		uint32_t dword4;
+		uint64_t m128i8[2];
+		uint32_t dword18;
+		uint32_t dword1C;
+		uint32_t word20;
+		char f22[2];
+		uint64_t m128i24[2];
+		uint32_t dword34;
+		uint32_t dword38;
+		char f3C[4];
+		uint32_t dword40;
+		uint32_t dword44;
+		uint32_t dword48;
+		uint32_t dword4C;
+		uint32_t dword50;
+		char byte54;
+		char byte55;
+		char byte56;
+		char f57[1];
+		uint16_t word58;
+		char byte5A;
+	};
+
+	typedef bool(__cdecl *RayTrace_t )(int, int, bool, Math::RealVector3D*, Math::RealVector3D*, int, int, int, RayTraceResult*);
+
+	bool Trace(int flags1, int flags2, bool a3, Math::RealVector3D* start, Math::RealVector3D* end, int a6, int a7, int a8, RayTraceResult* result)
+	{
+		return reinterpret_cast<RayTrace_t>(0x6D7190)(flags1, flags2, a3, start, end, a6, a7, a8, result);
+	}
+
+	static RayTrace_t old;
+	static std::ofstream log;
+
+	bool __cdecl RayTrace_hook(int a1, int a2, bool a3, Math::RealVector3D* a4, Math::RealVector3D* a5, int a6, int a7, int a8, RayTraceResult* a9)
+	{
+		/*
+		if(!log.is_open()) log.open("debug2.log", std::ios_base::app | std::ios_base::app);
+
+		char buff[1024];
+		snprintf(buff, sizeof(buff), "a1: 0x%X, a2: 0x%X, a3: %s, a6: %d, a7 %d, a8: %d\n", a1, a2, a3 == true ? "true" : "false", a6, a7, a8);
+		log << buff;*/
+
+		if(a6 != -1 || a7 != -1 || a8 != -1)
+		{
+			if (!log.is_open()) log.open("debug4.log", std::ios_base::app | std::ios_base::app);
+			
+			char buff[1024];
+			snprintf(buff, sizeof(buff), "a1: 0x%X, a2: 0x%X, a3: %s, a6: %u, a7 %u, a8: %u\n", a1, a2, a3 == true ? "true" : "false", a6, a7, a8);
+			log << buff;
+		}
+
+		return Halo::old(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+	}
 }
 
 namespace Pringle
@@ -160,13 +220,24 @@ namespace Pringle
 	ESP::ESP() : ModuleBase("pringle")
 	{
 		Enabled = this->AddVariableInt("esp.enabled", "esp.enabled", "Enables ESP", eCommandFlagsArchived, 0);
+		Flag1 = this->AddVariableInt("esp.flag1", "esp.flag1", "flag1", eCommandFlagsArchived, 0);
+		Flag2 = this->AddVariableInt("esp.flag2", "esp.flag2", "flag2", eCommandFlagsArchived, 0);
 
 		Hook::SubscribeMember<DirectX::EndScene>(this, &ESP::OnEndScene);
-		Hook::SubscribeMember<Hooks::PreTick>(this, &ESP::OnPreTick);
+		//Hook::SubscribeMember<Hooks::PreTick>(this, &ESP::OnPreTick);
 
 		Patches::Core::OnMapLoaded([](auto map) {
 			isMainMenu = !(std::string(map).find("mainmenu") == std::string::npos);
 		});
+
+		// hook
+		/*
+		Halo::old = reinterpret_cast<Halo::RayTrace_t>(0x6D7190);
+		DetourTransactionBegin();
+		DetourUpdateThread(GetCurrentThread());
+		LONG err = DetourAttach((void**)(&Halo::old), Halo::RayTrace_hook);
+		DetourTransactionCommit();
+		//*/
 	}
 
 	static void DrawRect(LPDIRECT3DDEVICE9 device, int x, int y, int w, int h, D3DCOLOR color)
@@ -207,13 +278,30 @@ namespace Pringle
 		angs->z = playerControlGlobalsPtr(0x314).Read<float>();
 	}
 
-	static uint32_t GetLocalPlayerHandle()
+	static Players::PlayerDatum* GetLocalPlayer()
 	{
-		auto handle = Players::GetLocalPlayer(0); // get local player handle
-		if (!handle || handle == DatumHandle::Null)
-			return DatumHandle::Null;
+		auto& handle = Players::GetLocalPlayer(0);
+		if (handle == DatumHandle::Null)
+			return NULL;
 
-		return handle.Handle;
+		auto pl = Players::GetPlayers().Get(handle);
+		if (!pl)
+			return NULL;
+
+		return pl;
+	}
+
+	static Objects::ObjectBase* GetLocalPlayerUnit()
+	{
+		auto lp = GetLocalPlayer();
+		if (!lp)
+			return NULL;
+
+		auto unit = Objects::Get(lp->SlaveUnit);
+		if (!unit)
+			return NULL;
+
+		return unit;
 	}
 
 	static void GetLocalPlayerHeadPosition(D3DXVECTOR3* headPos)
@@ -258,7 +346,7 @@ namespace Pringle
 		auto& players = Players::GetPlayers();
 		auto& localPlayerIndex = Players::GetLocalPlayer(0);
 		auto localPlayer = players.Get(localPlayerIndex);
-		
+
 		Vector pos = unit->Position, screen;
 		ToScreen(pos, screen);
 
@@ -267,14 +355,14 @@ namespace Pringle
 
 	void ESP::DrawPlayers(const DirectX::EndScene & msg)
 	{
-		for (auto it = ally_player_units.begin(); it != ally_player_units.end(); ++it) {
-			auto unit = *it;
+		for (int i = 0; i < ally_player_units.size(); ++i) {
+			auto unit = ally_player_units.at(i);
 			uint32_t color = D3DCOLOR_RGBA(100, 100, 255, 255);
 			this->Draw(msg, unit, color);
 		}
 
-		for (auto it = enemy_player_units.begin(); it != enemy_player_units.end(); ++it) {
-			auto unit = *it;
+		for (int i = 0; i < enemy_player_units.size(); ++i) {
+			auto unit = enemy_player_units.at(i);
 			uint32_t color = D3DCOLOR_RGBA(255, 100, 100, 255);
 			this->Draw(msg, unit, color);
 		}
@@ -285,11 +373,38 @@ namespace Pringle
 		if (isMainMenu)
 			return;
 
-		int width, height;
-		ModuleSettings::Instance().GetScreenResolution(&width, &height);
-		float fwidth = (float)width, fheight = (float)height;
+		auto& objects = Objects::GetObjects();
+		auto localPlayer = GetLocalPlayer();
+		if (!localPlayer)
+			return;
 
-		this->DrawPlayers(msg);
+		auto localPlayerUnit = GetLocalPlayerUnit();
+
+		if (!localPlayerUnit)
+			return;
+
+		for (auto it = objects.begin(); it != objects.end(); ++it) {
+			auto unit = it->Data;
+			if (!unit)
+				continue;
+
+			if (unit->TagIndex == localPlayerUnit->TagIndex)
+				continue;
+
+			Vector unitPos = unit->Position;
+			Vector screen;
+			ToScreen(unitPos, screen);
+
+			D3DCOLOR color;
+
+			Halo::RayTraceResult result; //0x16809, a2: 0x5305 //0x100809, a2: 0x5305
+			if (Halo::Trace(Flag1->ValueInt, Flag2->ValueInt, false, &localPlayerUnit->Position, &unit->Position, localPlayer->SlaveUnit.Handle, it->GetTagHandle(), -1, &result))
+				color = D3DCOLOR_RGBA(0, 255, 0, 255);
+			else
+				color = D3DCOLOR_RGBA(255, 0, 0, 255);
+
+			DrawRect(msg.Device, screen.X, screen.Y, 5, 5, color);
+		}
 	}
 
 	void ESP::OnPreTick(const Hooks::PreTick & msg)

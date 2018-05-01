@@ -20,6 +20,8 @@ namespace Pringle
 		ESP();
 
 		Modules::Command* Enabled;
+		Modules::Command* Flag1;
+		Modules::Command* Flag2;
 
 	protected:
 		void Draw(const Hooks::DirectX::EndScene & msg, Blam::Objects::ObjectBase* unit, uint32_t color);
