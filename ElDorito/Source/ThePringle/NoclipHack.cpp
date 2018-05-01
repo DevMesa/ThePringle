@@ -9,13 +9,9 @@
 #include "../Blam/BlamObjects.hpp"
 #include "../Blam/BlamPlayers.hpp"
 
-
-
-
 using namespace Pringle;
 using namespace Pringle::Hooks;
 using namespace Modules;
-
 
 NoclipHack::NoclipHack() : ModuleBase("pringle")
 {
@@ -24,24 +20,32 @@ NoclipHack::NoclipHack() : ModuleBase("pringle")
 	Hook::SubscribeMember<PreTick>(this, &NoclipHack::OnPreTick);
 }
 
-bool NoclipLastTick = false;
+bool LastTickEnabled = false;
 
-// copy/pasted from Forge.cpp line 1337 HandleMonitorNoclip
-void HandleNoclip(bool enabled)
+void NoclipHack::OnPreTick(const PreTick & msg)
 {
+	const auto& moduleForge = Modules::ModuleForge::Instance();
+	if (moduleForge.VarMonitorNoclip->ValueInt != 0)
+		return;
+
 	const auto object_set_havok_flags = (int(*)(uint32_t objectIndex, uint32_t havokFlags))(0x005C7380);
 
 	auto player = Blam::Players::GetPlayers().Get(Blam::Players::GetLocalPlayer(0));
 	if (!player)
 		return;
+
 	auto unitObject = Blam::Objects::Get(player->SlaveUnit.Handle);
 	if (!unitObject)
 		return;
-	if (enabled != NoclipLastTick) {
+
+	bool Enabled = this->Enabled->ValueInt != 0;
+
+	if (Enabled != LastTickEnabled) {
 		object_set_havok_flags(player->SlaveUnit, 0); // enable collisions, only done once when mod disabled
-		NoclipLastTick = enabled;
+		LastTickEnabled = Enabled;
 	}
-	if (enabled) {
+
+	if (Enabled) {
 		auto havokComponents = *(Blam::DataArray<Blam::DatumBase>**)0x02446080;
 		auto havokComponent = (uint8_t*)havokComponents->Get(unitObject->HavokComponent);
 		if (!havokComponent)
@@ -55,10 +59,3 @@ void HandleNoclip(bool enabled)
 		collisionFilter = 0x13;
 	}
 }
-
-
-void NoclipHack::OnPreTick(const PreTick & msg)
-{
-	HandleNoclip(this->Enabled->ValueInt != 0);
-}
-
