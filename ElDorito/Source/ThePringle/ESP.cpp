@@ -292,7 +292,7 @@ namespace Pringle
 		this->DrawPlayers(msg);
 	}
 
-	void ESP::OnPreTick(const Hooks::PreTick & msg)
+	void ESP::OnPreTick(const Hooks::PreTick& msg)
 	{
 		ally_player_units.clear();
 		enemy_player_units.clear();
@@ -300,6 +300,9 @@ namespace Pringle
 		auto& players = Players::GetPlayers();
 		auto& localPlayerIndex = Players::GetLocalPlayer(0);
 		auto localPlayer = players.Get(localPlayerIndex);
+
+		if (localPlayer == nullptr)
+			return;
 
 		for (auto it = players.begin(); it != players.end(); ++it) {
 			const auto& unitObjectIndex = it->SlaveUnit.Handle;
