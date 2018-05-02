@@ -122,18 +122,12 @@ void Aimbot::OnTick(const PostTick& msg)
 
 		}
 
-		Vector dir = localpos - besttarget.Position;
-		float len = std::sqrt(dir.I*dir.I + dir.J*dir.J + dir.K*dir.K);
-
-		dir /= len;
+		Vector dir = besttarget.Position - localpos;
+		dir /= std::sqrt(dir.I*dir.I + dir.J*dir.J + dir.K*dir.K);
 
 		yaw = std::atan2(dir.J, dir.I);
-		pitch = -std::asin(dir.K);
+		pitch = std::asin(dir.K);
 
-		yaw += 3.14159;
-	
-
-	
 		pitchptr.WriteFast(pitch);
 		yawptr.WriteFast(yaw);
 	}
