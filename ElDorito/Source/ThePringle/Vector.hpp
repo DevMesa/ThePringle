@@ -63,6 +63,7 @@ namespace Pringle
 			this->X OP##= other.X; \
 			this->Y OP##= other.Y; \
 			this->Z OP##= other.Z; \
+			return *this; \
 		} \
 		inline Vector operator##OP##=(float scaler) \
 		{ \
