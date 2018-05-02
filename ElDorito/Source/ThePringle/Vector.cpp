@@ -91,6 +91,13 @@ namespace Pringle
 
 		return this->Perp(axis) * cos_theta + axis.Cross(*this) * sin_theta + this->Parallel(axis);
 	}
+
+	EulerAngles Vector::Angles() const
+	{
+		auto norm = this->Normal();
+		return EulerAngles(Asin(norm.Z), Atan2(norm.Y, norm.X), 0_deg);
+	}
+
 	bool Vector::ToScreen(const Vector& cam_pos, const QAngle& cam_ang, Angle fov, float width, float height, float& out_x, float& out_y) const
 	{
 		Vector up = cam_ang.Up();

@@ -14,7 +14,9 @@ namespace Pringle
 		static Angle Degrees(float deg);
 		static Angle Radians(float rad);
 
-		float R;
+		float AsRadians();
+		float AsDegrees();
+
 		explicit Angle();
 		
 		inline Angle operator/(float scaler) const
@@ -32,22 +34,23 @@ namespace Pringle
 		inline Angle operator-() const
 		{ return Angle(-this->R); }
 	protected:
+		float R;
 		explicit Angle(float radians);
 	};
 
-	inline float Sin(Angle ang) { return std::sin(ang.R); }
+	inline float Sin(Angle ang) { return std::sin(ang.AsRadians()); }
 	inline Angle Asin(float x) { return Angle::Radians(std::asin(x)); }
-	inline float Cos(Angle ang) { return std::cos(ang.R); }
+	inline float Cos(Angle ang) { return std::cos(ang.AsRadians()); }
 	inline Angle Acos(float x) { return Angle::Radians(std::acos(x)); }
-	inline float Tan(Angle ang) { return std::tan(ang.R); }
+	inline float Tan(Angle ang) { return std::tan(ang.AsRadians()); }
 	inline Angle Atan(float x) { return Angle::Radians(std::atan(x)); }
-	inline Angle Atan2(float x, float y) { return Angle::Radians(std::atan2(x, y)); }
+	inline Angle Atan2(float y, float x) { return Angle::Radians(std::atan2(y, x)); }
 
-	struct EulerAngle
+	struct EulerAngles
 	{
 		Angle Pitch, Yaw, Roll;
-		EulerAngle();
-		EulerAngle(Angle pitch, Angle yaw, Angle roll);
+		EulerAngles();
+		EulerAngles(Angle pitch, Angle yaw, Angle roll);
 	};
 
 	Pringle::Angle operator"" _deg(long double val);

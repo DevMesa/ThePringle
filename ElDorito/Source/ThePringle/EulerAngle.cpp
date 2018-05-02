@@ -16,6 +16,16 @@ namespace Pringle
 		return Angle(rad);
 	}
 
+	float Angle::AsRadians()
+	{
+		return this->R;
+	}
+
+	float Angle::AsDegrees()
+	{
+		return this->R / pi<float> * 180.0f;
+	}
+
 	Angle::Angle() :
 		R(0)
 	{
@@ -26,12 +36,12 @@ namespace Pringle
 	{
 	}
 
-	EulerAngle::EulerAngle() :
-		EulerAngle(0_deg, 0_deg, 0_deg)
+	EulerAngles::EulerAngles() :
+		EulerAngles(0_deg, 0_deg, 0_deg)
 	{
 	}
 
-	EulerAngle::EulerAngle(Angle pitch, Angle yaw, Angle roll) :
+	EulerAngles::EulerAngles(Angle pitch, Angle yaw, Angle roll) :
 		Pitch(pitch), Yaw(yaw), Roll(roll)
 	{
 	}

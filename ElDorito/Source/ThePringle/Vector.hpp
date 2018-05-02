@@ -15,6 +15,7 @@ namespace Pringle
 {
 	struct Angle;
 	struct QAngle;
+	struct EulerAngles;
 	struct Vector
 	{
 		static Vector Zero();
@@ -50,6 +51,7 @@ namespace Pringle
 		Vector Perp(const Vector& axis) const;
 		Vector RotateAroundAxis(const Vector& axis, Angle angle);
 
+		EulerAngles Angles() const;
 		bool ToScreen(const Vector& cam_pos, const QAngle& cam_ang, Angle fov, float width, float height, float& out_x, float& out_y) const;
 
 		// generate the various operations
