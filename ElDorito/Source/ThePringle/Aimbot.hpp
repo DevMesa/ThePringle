@@ -25,7 +25,7 @@ namespace Pringle
 	protected:
 		Vector CachedLocalPosition;
 		int CachedTeam;
-		QAngle CachedViewAngles;
+		Vector CachedAimDirection;
 
 		Command* Enabled;
 		Command* X;

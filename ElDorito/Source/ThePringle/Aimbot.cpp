@@ -99,8 +99,8 @@ void Pringle::Aimbot::ScoreDistance(const AimbotEvents::ScoreTarget& msg)
 
 void Pringle::Aimbot::ScoreCenter(const AimbotEvents::ScoreTarget& msg)
 {
-	float dot = this->CachedViewAngles.Forward()
-		.Dot(this->CachedLocalPosition - msg.What.Position);
+	float dot = this->CachedAimDirection
+		.Dot(msg.What.Position - this->CachedLocalPosition);
 	float perc = (dot + 1.0f) * 0.5f;
 
 	msg.Importance *= 
@@ -151,14 +151,14 @@ void Aimbot::OnTick(const PostTick& msg)
 
 	Pointer inputptr = ElDorito::GetMainTls(GameGlobals::Input::TLSOffset)[0];
 
-	Pointer &pitchptr = inputptr(GameGlobals::Input::VerticalViewAngle);
-	Pointer &yawptr = inputptr(GameGlobals::Input::HorizontalViewAngle);
+	Pointer& pitchptr = inputptr(GameGlobals::Input::VerticalViewAngle);
+	Pointer& yawptr = inputptr(GameGlobals::Input::HorizontalViewAngle);
 
 	float pitch = pitchptr.Read<float>();
 	float yaw = yawptr.Read<float>();
 	
 	this->CachedLocalPosition = localplayerunit->Position;
-	this->CachedViewAngles = QAngle(Angle::Radians(pitch), Angle::Radians(yaw), 0_deg);
+	this->CachedAimDirection = Vector(Angle::Radians(pitch), Angle::Radians(yaw));
 	this->CachedTeam = localplayer->Properties.TeamIndex;
 
 	if (this->Enabled->ValueInt != 0)

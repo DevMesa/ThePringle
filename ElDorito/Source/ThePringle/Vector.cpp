@@ -24,6 +24,11 @@ namespace Pringle
 		Vector(other.x, other.y, other.z)
 	{}
 
+	Vector::Vector(Angle pitch, Angle yaw) :
+		X(Cos(yaw)), Y(Sin(yaw)), Z(Sin(pitch))
+	{
+	}
+
 	/*inline*/ float Vector::LengthSequared() const
 	{
 		return this->X * this->X + this->Y * this->Y + this->Z * this->Z;
