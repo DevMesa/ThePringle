@@ -1,0 +1,30 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: buildpack-deps:stretch
+
+    working_directory: ~/repo
+
+    steps:
+
+      - checkout
+
+      # Clang-format sources check
+      - run: |
+          apt update -y
+          apt install -y clang-format
+          # ln -s /usr/bin/clang-format-3.8 /usr/bin/clang-format
+          SOURCE_FILES=`find ./ElDorito/Source/ThePringle/ -name \*.cpp -type f -or -name \*.hpp -or -name \*.h -type f`
+          EXIT_CODE=0
+          for SOURCE_FILE in $SOURCE_FILES
+          do
+            export FORMATTING_ISSUE_COUNT=`clang-format -output-replacements-xml $SOURCE_FILE | grep offset | wc -l`
+            export CLANG_FORMAT=`clang-format $SOURCE_FILE`
+            if [ "$FORMATTING_ISSUE_COUNT" -gt "0" ]; then
+              echo "Source file $SOURCE_FILE contains formatting issues. Please use clang-format tool to resolve found issues."
+              echo "$CLANG_FORMAT"
+              EXIT_CODE="1"
+            fi
+          done
+          exit "$EXIT_CODE"
