@@ -1,10 +1,12 @@
 #include "Aimbot.hpp"
+#include "Util.hpp"
 
 #include <string>  
 
 #include <iostream>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 #include "../ElDorito.hpp"
 #include "../Blam/BlamTypes.hpp"
@@ -125,8 +127,6 @@ void Pringle::Aimbot::ScoreTeam(const AimbotEvents::ScoreTarget& msg)
 			this->TeamImportance->ValueFloat);
 }
 
-
-
 static double Scale(double x, double from_min, double from_max, double to_min, double to_max)
 {
 	double from_diff = from_max - from_min;
@@ -164,7 +164,7 @@ void Aimbot::OnTick(const PostTick& msg)
 	if (this->Enabled->ValueInt != 0)
 	{
 		Vector best_pos;
-		float best_score = 0.0f;
+		float best_score = std::numeric_limits<float>::epsilon(); // the lowest score we will accept
 		bool best_got = false;
 
 		Hook::Call<AimbotEvents::GetTargets>([&](const AimbotEvents::Target& targ) -> void
@@ -172,7 +172,7 @@ void Aimbot::OnTick(const PostTick& msg)
 			float score = 0;
 			Hook::Call<AimbotEvents::ScoreTarget>(targ, score);
 
-			if (score > best_score || !best_got)
+			if (score > best_score)
 			{
 				best_score = score;
 				best_pos = targ.Position;
