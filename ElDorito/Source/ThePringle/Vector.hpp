@@ -15,6 +15,7 @@ namespace Pringle
 {
 	struct Angle;
 	struct QAngle;
+	struct EulerAngles;
 	struct Vector
 	{
 		static Vector Zero();
@@ -31,6 +32,7 @@ namespace Pringle
 		Vector(float  x, float y, float z);
 		Vector(const Blam::Math::RealVector3D& other);
 		Vector(const D3DXVECTOR3& other);
+		Vector(Angle pitch, Angle yaw);
 
 		operator Blam::Math::RealVector3D() const
 		{ return Blam::Math::RealVector3D(this->X, this->Y, this->Z); }
@@ -50,6 +52,7 @@ namespace Pringle
 		Vector Perp(const Vector& axis) const;
 		Vector RotateAroundAxis(const Vector& axis, Angle angle);
 
+		EulerAngles Angles() const;
 		bool ToScreen(const Vector& cam_pos, const QAngle& cam_ang, Angle fov, float width, float height, float& out_x, float& out_y) const;
 
 		// generate the various operations

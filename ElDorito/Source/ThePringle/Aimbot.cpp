@@ -1,10 +1,12 @@
 #include "Aimbot.hpp"
+#include "Util.hpp"
 
 #include <string>  
 
 #include <iostream>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 #include "../ElDorito.hpp"
 #include "../Blam/BlamTypes.hpp"
@@ -16,7 +18,6 @@ using namespace Pringle;
 using namespace Pringle::Hooks;
 using namespace Modules;
 
-using Vector = Blam::Math::RealVector3D;
 
 void Aimbot::Initalize()
 {
@@ -28,12 +29,23 @@ Aimbot::Aimbot() : ModuleBase("pringle")
 	this->Enabled = this->AddVariableInt("aimbot.enabled", "aimbot.enabled", "Enable the hack", eCommandFlagsArchived, 0);
 	this->X = this->AddVariableInt("aimbot.x", "aimbot.x", "Enable the hack", eCommandFlagsArchived, 0);
 	this->Y = this->AddVariableFloat("aimbot.y", "aimbot.y", "Enable the hack", eCommandFlagsArchived, 0);
+	
+	this->DistanceHalfAt = this->AddVariableFloat("aimbot.importance.distance.halfat", "aimbot.importance.distance.halfat", "0.5 importance at x distance", eCommandFlagsArchived, 20.0f);
+	this->DistanceImportance = this->AddVariableFloat("aimbot.importance.distance", "aimbot.importance.distance", "Distance importance", eCommandFlagsArchived, 0.5f);
+
+	this->CenterImportance = this->AddVariableFloat("aimbot.importance.center", "aimbot.importance.center", "Importance of them being in the center of the screen", eCommandFlagsArchived, 0.5f);
+	this->AliveImportance = this->AddVariableFloat("aimbot.importance.alive", "aimbot.importance.alive", "Importance of them being alive", eCommandFlagsArchived, 1.0f);
+	this->TeamImportance = this->AddVariableFloat("aimbot.importance.team", "aimbot.importance.team", "Importance of them being on a different team", eCommandFlagsArchived, 1.0f);
 
 	Hook::SubscribeMember<PostTick>(this, &Aimbot::OnTick);
-	Hook::SubscribeMember<GetTargets>(this, &Aimbot::OnGetTargets);
+	Hook::SubscribeMember<AimbotEvents::GetTargets>(this, &Aimbot::GetPlayers);
+	Hook::SubscribeMember<AimbotEvents::ScoreTarget>(this, &Aimbot::ScoreDistance);
+	Hook::SubscribeMember<AimbotEvents::ScoreTarget>(this, &Aimbot::ScoreCenter);
+	Hook::SubscribeMember<AimbotEvents::ScoreTarget>(this, &Aimbot::ScoreAlive);
+	Hook::SubscribeMember<AimbotEvents::ScoreTarget>(this, &Aimbot::ScoreTeam);
 }
 
-void Aimbot::OnGetTargets(const GetTargets& msg)
+void Aimbot::GetPlayers(const AimbotEvents::GetTargets& msg)
 {
 	auto& players = Blam::Players::GetPlayers();
 	auto& localplayerhandle = Blam::Players::GetLocalPlayer(0);
@@ -48,21 +60,71 @@ void Aimbot::OnGetTargets(const GetTargets& msg)
 		if (players.Get(localplayerhandle)->SlaveUnit.Handle == unitObjectIndex)
 			continue;
 
-		const auto& unit = Blam::Objects::Get(unitObjectIndex);
+		auto unit = Blam::Objects::Get(unitObjectIndex);
 		
 		if (!unit)
 			continue;
 
-		if (it->DeadSlaveUnit)
-			continue;
-
-		if (it->Properties.TeamIndex == players.Get(localplayerhandle)->Properties.TeamIndex)
-			continue;
-
-		msg.Targets.emplace_back(unit->Position, unit->Velocity);
+		QAngle null_viewang = QAngle(Quaternion::Identity());
+		AimbotEvents::Target::Info info = {
+			/*Velocity =*/ reinterpret_cast<Vector&>(unit->Velocity),
+			/*ViewAngles =*/ null_viewang,
+			/*Team =*/ it->Properties.TeamIndex,
+			/*Alive =*/ !it->DeadSlaveUnit,
+			/*Player =*/ true
+		};
 		
+		AimbotEvents::Target target(
+			reinterpret_cast<Vector&>(unit->Position),
+			info
+		);
+
+		msg.GotTarget(target);
 	}
 
+}
+
+void Pringle::Aimbot::ScoreDistance(const AimbotEvents::ScoreTarget& msg)
+{
+	// higher = more linear, distance is more important farther away
+	// lowering it means distance is less important farther away
+	// the score will be * 0.5f at x units away
+	float point5_at_distance = this->DistanceHalfAt->ValueFloat;
+	float distance_importance = this->DistanceImportance->ValueFloat;
+
+	float distance = (msg.What.Position - this->CachedLocalPosition).Length();
+	msg.Importance *= 
+		AimbotEvents::ScoreTarget::Calculate(
+			point5_at_distance / (point5_at_distance + distance),
+			distance_importance);
+}
+
+void Pringle::Aimbot::ScoreCenter(const AimbotEvents::ScoreTarget& msg)
+{
+	float dot = this->CachedAimDirection
+		.Dot(msg.What.Position - this->CachedLocalPosition);
+	float perc = (dot + 1.0f) * 0.5f;
+
+	msg.Importance *= 
+		AimbotEvents::ScoreTarget::Calculate(
+			perc,
+			this->CenterImportance->ValueFloat);
+}
+
+void Pringle::Aimbot::ScoreAlive(const AimbotEvents::ScoreTarget& msg)
+{
+	msg.Importance *=
+		AimbotEvents::ScoreTarget::Calculate(
+			msg.What.Information.Alive ? 1 : 0,
+			this->AliveImportance->ValueFloat);
+}
+
+void Pringle::Aimbot::ScoreTeam(const AimbotEvents::ScoreTarget& msg)
+{
+	msg.Importance *=
+		AimbotEvents::ScoreTarget::Calculate(
+			msg.What.Information.Team == this->CachedTeam ? 0 : 1,
+			this->TeamImportance->ValueFloat);
 }
 
 static double Scale(double x, double from_min, double from_max, double to_min, double to_max)
@@ -82,54 +144,50 @@ void Aimbot::OnTick(const PostTick& msg)
 	if (localplayer == nullptr)
 		return;
 
-	const auto& localplayerunit = Blam::Objects::Get(localplayer->SlaveUnit.Handle);
+	auto localplayerunit = Blam::Objects::Get(localplayer->SlaveUnit.Handle);
 
 	if (localplayerunit == nullptr)
 		return;
 
 	Pointer inputptr = ElDorito::GetMainTls(GameGlobals::Input::TLSOffset)[0];
 
-	Pointer &pitchptr = inputptr(GameGlobals::Input::VerticalViewAngle);
-	Pointer &yawptr = inputptr(GameGlobals::Input::HorizontalViewAngle);
+	Pointer& pitchptr = inputptr(GameGlobals::Input::VerticalViewAngle);
+	Pointer& yawptr = inputptr(GameGlobals::Input::HorizontalViewAngle);
 
 	float pitch = pitchptr.Read<float>();
 	float yaw = yawptr.Read<float>();
 	
-	const auto& localpos = localplayerunit->Position;
+	this->CachedLocalPosition = localplayerunit->Position;
+	this->CachedAimDirection = Vector(Angle::Radians(pitch), Angle::Radians(yaw));
+	this->CachedTeam = localplayer->Properties.TeamIndex;
 
 	if (this->Enabled->ValueInt != 0)
 	{
-		CachedTargets.clear();
-		Hook::Call<Hooks::GetTargets>(CachedTargets);
+		Vector best_pos;
+		float best_score = std::numeric_limits<float>::epsilon(); // the lowest score we will accept
+		bool best_got = false;
 
-		if (CachedTargets.size() == 0)
+		Hook::Call<AimbotEvents::GetTargets>([&](const AimbotEvents::Target& targ) -> void
+		{
+			float score = 0;
+			Hook::Call<AimbotEvents::ScoreTarget>(targ, score);
+
+			if (score > best_score)
+			{
+				best_score = score;
+				best_pos = targ.Position;
+				best_got = true;
+			}
+		}, AimbotEvents::AimPosition::CenterMass);
+
+		if (!best_got)
 			return;
 		
-		auto& besttarget = CachedTargets.back();
-		float bestdist = (besttarget.Position - localpos).Length();
+		Vector dir = (best_pos - this->CachedLocalPosition).Normal();
+		EulerAngles ang = dir.Angles();
 
-		for (const auto& target : CachedTargets)
-		{
-			const auto& targetpos = target.Position;
-
-			float dist = (targetpos - localpos).Length();
-
-			if (dist < bestdist)
-			{
-				bestdist = dist;
-				besttarget = target;
-			}
-
-		}
-
-		Vector dir = besttarget.Position - localpos;
-		dir /= std::sqrt(dir.I*dir.I + dir.J*dir.J + dir.K*dir.K);
-
-		yaw = std::atan2(dir.J, dir.I);
-		pitch = std::asin(dir.K);
-
-		pitchptr.WriteFast(pitch);
-		yawptr.WriteFast(yaw);
+		pitchptr.WriteFast(ang.Pitch.AsRadians());
+		yawptr.WriteFast(ang.Yaw.AsRadians());
 	}
 }
 

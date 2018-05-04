@@ -13,8 +13,11 @@ namespace Pringle
 {
 	struct QAngle
 	{
+		static QAngle Identity();
+
 		Quaternion Quat;
 
+		QAngle();
 		QAngle(const Quaternion& quat);
 		QAngle(Angle pitch, Angle yaw, Angle roll);
 		QAngle(Vector direction, Angle roll);

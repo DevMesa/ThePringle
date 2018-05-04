@@ -2,9 +2,12 @@
 #ifndef PRINGLE_HOOKEVENTS
 #define PRINGLE_HOOKEVENTS
 
-#include <d3d9.h>
-#include "Blam/Math/RealVector3D.hpp"
 #include <vector>
+
+#include <d3d9.h>
+
+#include "Vector.hpp"
+#include "QAngle.hpp"
 
 namespace Pringle
 {
@@ -45,7 +48,7 @@ namespace Pringle
 			ModifyGravityMultiplier(float& gravity) : Gravity(gravity) { }
 		};
 		
-		struct GetTargets
+		namespace AimbotEvents
 		{
 			struct AimPosition
 			{
@@ -56,32 +59,63 @@ namespace Pringle
 				};
 			};
 
+			// returns all the valid targets we *could* attack
+			// e.g: if friendly fire is off, don't return team members
+			// but if it's on, return team members, even if team members are later ignored
 			struct Target
 			{
-				Blam::Math::RealVector3D Position;
-				Blam::Math::RealVector3D Velocity; // projectiles will need this
-				AimPosition::Enum AimPart;			
-				float Priority;
+				struct Info
+				{
+					const Vector& Velocity;
+					const QAngle& ViewAngles;
 
-				Target(
-					const Blam::Math::RealVector3D& pos,
-					const Blam::Math::RealVector3D& vel,
-					AimPosition::Enum                aimpart   = AimPosition::CenterMass,
-					float                            priority  = 0.0f
-				) :
+					const int Team;
+					const bool Alive : 1;
+					const bool Player : 1;
+				};
+
+				// make a copy of this as it's mutable
+				Vector Position;
+				const Info& Information;
+
+				Target(const Vector& pos, const Info& info) :
 					Position(pos),
-					Velocity(vel),
-					AimPart(aimpart),
-					Priority(priority)
-				{};
+					Information(info)
+				{}
 			};
 
-			// reference to a list to save allocations
-			std::vector<Target>& Targets;
+			struct ScoreTarget
+			{
+				const Target& What;
+				float& Importance;
 
-			GetTargets(decltype(Targets) targets) : Targets(targets) {}
-		};
-		
+				static float Calculate(float value, float importance)
+				{
+					// basically: interp(value, 1 - importance, 1)
+					return (1.0f - importance) + value * importance;
+				}
+
+				ScoreTarget(const Target& what, float& out_importance) :
+					What(what),
+					Importance(out_importance)
+				{
+					// the default value that will be scaled and shit
+					// shouldn't really matter if it's 100 or 1,
+					// but 0 to 100 is a nice range for humans reading it
+					out_importance = 100.0f;
+				}
+			};
+
+			struct GetTargets
+			{
+				// information about where you want to target them
+				AimPosition::Enum                AimAt;
+				std::function<void(Target& got)> GotTarget;
+
+				GetTargets(const std::function<void(Target& got)>&& got_target, AimPosition::Enum aimat) : GotTarget(got_target), AimAt(aimat) {}
+			};
+		}
+
 		struct ModifyMarkerVisibility
 		{
 			bool& Visibility;

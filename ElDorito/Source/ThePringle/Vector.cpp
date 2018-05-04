@@ -24,6 +24,11 @@ namespace Pringle
 		Vector(other.x, other.y, other.z)
 	{}
 
+	Vector::Vector(Angle pitch, Angle yaw) :
+		X(Cos(yaw)), Y(Sin(yaw)), Z(Sin(pitch))
+	{
+	}
+
 	/*inline*/ float Vector::LengthSequared() const
 	{
 		return this->X * this->X + this->Y * this->Y + this->Z * this->Z;
@@ -91,6 +96,13 @@ namespace Pringle
 
 		return this->Perp(axis) * cos_theta + axis.Cross(*this) * sin_theta + this->Parallel(axis);
 	}
+
+	EulerAngles Vector::Angles() const
+	{
+		auto norm = this->Normal();
+		return EulerAngles(Asin(norm.Z), Atan2(norm.Y, norm.X), 0_deg);
+	}
+
 	bool Vector::ToScreen(const Vector& cam_pos, const QAngle& cam_ang, Angle fov, float width, float height, float& out_x, float& out_y) const
 	{
 		Vector up = cam_ang.Up();

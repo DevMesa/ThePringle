@@ -23,14 +23,29 @@ namespace Pringle
 		Aimbot();
 
 	protected:
+		Vector CachedLocalPosition;
+		int CachedTeam;
+		Vector CachedAimDirection;
+
 		Command* Enabled;
 		Command* X;
 		Command* Y;
 
-		void OnTick(const PostTick& msg);
+		Command* DistanceHalfAt;
+		Command* DistanceImportance;
 
-		std::vector<GetTargets::Target> CachedTargets;
-		void OnGetTargets(const GetTargets& msg);
+		Command* CenterImportance;
+
+		Command* AliveImportance;
+		Command* TeamImportance;
+
+		void OnTick(const PostTick& msg);
+		void GetPlayers(const AimbotEvents::GetTargets& msg);
+
+		void ScoreDistance(const AimbotEvents::ScoreTarget& msg);
+		void ScoreCenter(const AimbotEvents::ScoreTarget& msg);
+		void ScoreAlive(const AimbotEvents::ScoreTarget& msg);
+		void ScoreTeam(const AimbotEvents::ScoreTarget& msg);
 	};
 }
 

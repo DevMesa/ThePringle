@@ -282,7 +282,7 @@ namespace Pringle
 
 	void ESP::OnEndScene(const DirectX::EndScene & msg)
 	{
-		if (isMainMenu)
+		if (isMainMenu || this->Enabled->ValueInt == 0)
 			return;
 
 		int width, height;
