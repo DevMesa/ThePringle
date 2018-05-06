@@ -1,4 +1,5 @@
 #include "Aimbot.hpp"
+#include "Halo/Halo.hpp"
 
 #include <string>  
 
@@ -10,6 +11,7 @@
 #include "../Blam/BlamTypes.hpp"
 #include "../Blam/BlamPlayers.hpp"
 #include "../Blam/BlamObjects.hpp"
+#include "../Blam/Math/RealVector3D.hpp"
 #include "../Console.hpp"
 
 using namespace Pringle;
@@ -17,6 +19,8 @@ using namespace Pringle::Hooks;
 using namespace Modules;
 
 using Vector = Blam::Math::RealVector3D;
+
+const static auto Unit_GetHeadPosition = (void(__cdecl*)(uint32_t unitObjectIndex, Vector *position))(0x00B439D0);
 
 void Aimbot::Initalize()
 {
@@ -59,8 +63,18 @@ void Aimbot::OnGetTargets(const GetTargets& msg)
 		if (it->Properties.TeamIndex == players.Get(localplayerhandle)->Properties.TeamIndex)
 			continue;
 
+		auto localPlayerUnitIndex = players.Get(localplayerhandle)->SlaveUnit;
+
+		Vector playerPos;
+		Vector targetPos;
+
+		Unit_GetHeadPosition(localPlayerUnitIndex, &playerPos);
+		Unit_GetHeadPosition(unitObjectIndex, &targetPos);
+
+		if (!Halo::SimpleHitTest(&playerPos, &targetPos, localPlayerUnitIndex, -1))
+			continue;
+
 		msg.Targets.emplace_back(unit->Position, unit->Velocity);
-		
 	}
 
 }
@@ -130,9 +144,7 @@ void Aimbot::OnTick(const PostTick& msg)
 		yaw = std::atan2(dir.J, dir.I);
 		pitch = -std::asin(dir.K);
 
-		yaw += 3.14159;
-	
-
+		yaw += 3.14159f;
 	
 		pitchptr.WriteFast(pitch);
 		yawptr.WriteFast(yaw);

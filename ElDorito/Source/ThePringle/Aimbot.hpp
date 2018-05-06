@@ -8,29 +8,31 @@
 #include "../Modules/ModuleBase.hpp"
 #include "../Utils/Singleton.hpp"
 
-using namespace Pringle;
-using namespace Pringle::Hooks;
-using namespace Modules;
+//using namespace Pringle;
+//using namespace Pringle::Hooks;
+//using namespace Modules;
 
 namespace Pringle
 {
 	class Aimbot :
 		public Utils::Singleton<Aimbot>,
-		public ModuleBase
+		public Modules::ModuleBase
 	{
 	public:
 		static void Initalize();
 		Aimbot();
 
 	protected:
-		Command* Enabled;
-		Command* X;
-		Command* Y;
+		Modules::Command* Enabled;
+		Modules::Command* X;
+		Modules::Command* Y;
 
-		void OnTick(const PostTick& msg);
+		bool HitTest(Blam::Math::RealVector3D start, Blam::Math::RealVector3D end);
 
-		std::vector<GetTargets::Target> CachedTargets;
-		void OnGetTargets(const GetTargets& msg);
+		void OnTick(const Pringle::Hooks::PostTick& msg);
+
+		std::vector<Pringle::Hooks::GetTargets::Target> CachedTargets;
+		void OnGetTargets(const Pringle::Hooks::GetTargets& msg);
 	};
 }
 

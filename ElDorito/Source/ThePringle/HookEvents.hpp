@@ -58,6 +58,7 @@ namespace Pringle
 
 			struct Target
 			{
+				Blam::Math::RealVector3D Origin;
 				Blam::Math::RealVector3D Position;
 				Blam::Math::RealVector3D Velocity; // projectiles will need this
 				AimPosition::Enum AimPart;			

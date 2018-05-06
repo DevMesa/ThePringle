@@ -94,6 +94,9 @@
     <Filter Include="ThePringle">
       <UniqueIdentifier>{e07c2c55-d726-4b22-a509-e3d5dd011560}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ThePringle\Halo">
+      <UniqueIdentifier>{b6bb290e-fc67-4cfe-82d2-9f482a81443e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Blam\BitStream.cpp">
@@ -1322,6 +1325,9 @@
     </ClInclude>
     <ClInclude Include="Source\ThePringle\HookEvents.hpp" />
     <ClInclude Include="Source\ThePringle\Quaternion.hpp" />
+    <ClInclude Include="Source\ThePringle\Halo\Halo.hpp">
+      <Filter>ThePringle\Halo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Source\ElDorito.rc" />
