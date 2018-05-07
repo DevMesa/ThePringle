@@ -32,6 +32,8 @@ Aimbot::Aimbot() : ModuleBase("pringle")
 	this->X = this->AddVariableInt("aimbot.x", "aimbot.x", "Enable the hack", eCommandFlagsArchived, 0);
 	this->Y = this->AddVariableFloat("aimbot.y", "aimbot.y", "Enable the hack", eCommandFlagsArchived, 0);
 	
+	this->AimPos = this->AddVariableString("aimbot.aimpos", "aimbot.aimpos", "head, center, origin", eCommandFlagsArchived, "center");
+
 	this->DistanceHalfAt = this->AddVariableFloat("aimbot.importance.distance.halfat", "aimbot.importance.distance.halfat", "0.5 importance at x distance", eCommandFlagsArchived, 20.0f);
 	this->DistanceImportance = this->AddVariableFloat("aimbot.importance.distance", "aimbot.importance.distance", "Distance importance", eCommandFlagsArchived, 0.5f);
 
@@ -213,6 +215,15 @@ void Aimbot::OnTick(const PostTick& msg)
 		float best_score = std::numeric_limits<float>::epsilon(); // the lowest score we will accept
 		bool best_got = false;
 
+		AimbotEvents::AimPosition::Enum aimpos = AimbotEvents::AimPosition::Origin;
+
+		if (this->AimPos->ValueString == "head")
+			aimpos = AimbotEvents::AimPosition::Head;
+		else if (this->AimPos->ValueString == "center")
+			aimpos = AimbotEvents::AimPosition::Center;
+		else if (this->AimPos->ValueString == "origin")
+			aimpos = AimbotEvents::AimPosition::Origin;
+
 		Hook::Call<AimbotEvents::GetTargets>([&](const AimbotEvents::Target& targ) -> void
 		{
 			float score = 0;
@@ -224,7 +235,7 @@ void Aimbot::OnTick(const PostTick& msg)
 				best_pos = targ.Position;
 				best_got = true;
 			}
-		}, AimbotEvents::AimPosition::Center);
+		}, aimpos);
 
 		if (!best_got)
 			return;

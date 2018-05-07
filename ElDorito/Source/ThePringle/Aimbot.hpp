@@ -27,6 +27,8 @@ namespace Pringle
 		Modules::Command* X;
 		Modules::Command* Y;
 
+		Modules::Command* AimPos;
+
 		Modules::Command* DistanceHalfAt;
 		Modules::Command* DistanceImportance;
 
