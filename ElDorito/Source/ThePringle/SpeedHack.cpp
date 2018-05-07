@@ -4,13 +4,13 @@ using namespace Pringle;
 using namespace Pringle::Hooks;
 using namespace Modules;
 
-SpeedHack::SpeedHack() : ModuleBase("pringle")
+SpeedHack::SpeedHack() : ModuleBase("Pringle")
 {
-	this->Factor = this->AddVariableFloat("speed.multiplier", "speed.multiplier", "Player speed multiplier", eCommandFlagsArchived, 1.0f);
-	this->Enabled = this->AddVariableInt("speed.enabled", "speed.enabled", "Enable the hack", eCommandFlagsArchived, 0);
+	this->Factor = this->AddVariableFloat("Speed.Multiplier", "speed.multiplier", "Player speed multiplier", eCommandFlagsArchived, 1.0f);
+	this->Enabled = this->AddVariableInt("Speed.Enabled", "speed.enabled", "Enable the hack", eCommandFlagsArchived, 0);
 
-	this->EnableAirAcceleration = this->AddVariableInt("speed.airaccelerate.enabled", "speed.airaccelerate.enabled", "Enable the hack", eCommandFlagsArchived, 0);
-	this->AirAcceleration = this->AddVariableFloat("speed.airaccelerate.value", "speed.airaccelerate.value", "Allows you to fly in the air", eCommandFlagsArchived, 999.f);
+	this->EnableAirAcceleration = this->AddVariableInt("Speed.AirAccelerate.Enabled", "speed.airaccelerate.enabled", "Enable the hack", eCommandFlagsArchived, 0);
+	this->AirAcceleration = this->AddVariableFloat("Speed.AirAccelerate.Value", "speed.airaccelerate.value", "Allows you to fly in the air", eCommandFlagsArchived, 999.f);
 
 	Hook::SubscribeMember<ModifySpeedMultiplier>(this, &SpeedHack::OnModifySpeedMultiplier);
 	Hook::SubscribeMember<ModifyAcceleration>(this, &SpeedHack::OnModifyAcceleration);

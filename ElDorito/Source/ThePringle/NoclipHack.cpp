@@ -13,9 +13,9 @@ using namespace Pringle;
 using namespace Pringle::Hooks;
 using namespace Modules;
 
-NoclipHack::NoclipHack() : ModuleBase("pringle")
+NoclipHack::NoclipHack() : ModuleBase("Pringle")
 {
-	this->Enabled = this->AddVariableInt("noclip.enabled", "noclip.enabled", "Enable the hack", eCommandFlagsArchived, 0);
+	this->Enabled = this->AddVariableInt("NoClip.Enabled", "noclip.enabled", "Enable the hack", eCommandFlagsArchived, 0);
 
 	Hook::SubscribeMember<PreTick>(this, &NoclipHack::OnPreTick);
 }

@@ -27,22 +27,22 @@ void Aimbot::Initalize()
 	static Aimbot AimbotInstance;
 }
 
-Aimbot::Aimbot() : ModuleBase("pringle")
+Aimbot::Aimbot() : ModuleBase("Pringle")
 {
-	this->Enabled = this->AddVariableInt("aimbot.enabled", "aimbot.enabled", "Enable the hack", eCommandFlagsArchived, 0);
-	this->AutoShoot = this->AddVariableInt("aimbot.autoshoot", "aimbot.autoshoot", "Enable autoshooting", eCommandFlagsArchived, 1);
-	this->X = this->AddVariableInt("aimbot.x", "aimbot.x", "Enable the hack", eCommandFlagsArchived, 0);
-	this->Y = this->AddVariableFloat("aimbot.y", "aimbot.y", "Enable the hack", eCommandFlagsArchived, 0);
+	this->Enabled = this->AddVariableInt("Aimbot.Enabled", "aimbot.enabled", "Enable the hack", eCommandFlagsArchived, 0);
+	this->AutoShoot = this->AddVariableInt("Aimbot.AutoShoot", "aimbot.autoshoot", "Enable autoshooting", eCommandFlagsArchived, 1);
+	this->X = this->AddVariableInt("Aimbot.X", "aimbot.x", "Enable the hack", eCommandFlagsArchived, 0);
+	this->Y = this->AddVariableFloat("Aimbot.Y", "aimbot.y", "Enable the hack", eCommandFlagsArchived, 0);
 	
-	this->AimPos = this->AddVariableString("aimbot.aimpos", "aimbot.aimpos", "head, center, origin", eCommandFlagsArchived, "center");
+	this->AimPos = this->AddVariableString("Aimbot.AimPos", "aimbot.aimpos", "head, center, origin", eCommandFlagsArchived, "center");
 
-	this->DistanceHalfAt = this->AddVariableFloat("aimbot.importance.distance.halfat", "aimbot.importance.distance.halfat", "0.5 importance at x distance", eCommandFlagsArchived, 20.0f);
-	this->DistanceImportance = this->AddVariableFloat("aimbot.importance.distance", "aimbot.importance.distance", "Distance importance", eCommandFlagsArchived, 0.5f);
+	this->DistanceHalfAt = this->AddVariableFloat("Aimbot.Importance.Distance.HalfAt", "aimbot.importance.distance.halfat", "0.5 importance at x distance", eCommandFlagsArchived, 20.0f);
+	this->DistanceImportance = this->AddVariableFloat("Aimbot.Importance.Distance", "aimbot.importance.distance", "Distance importance", eCommandFlagsArchived, 0.5f);
 
-	this->CenterImportance = this->AddVariableFloat("aimbot.importance.center", "aimbot.importance.center", "Importance of them being in the center of the screen", eCommandFlagsArchived, 0.5f);
-	this->AliveImportance = this->AddVariableFloat("aimbot.importance.alive", "aimbot.importance.alive", "Importance of them being alive", eCommandFlagsArchived, 1.0f);
-	this->TeamImportance = this->AddVariableFloat("aimbot.importance.team", "aimbot.importance.team", "Importance of them being on a different team", eCommandFlagsArchived, 1.0f);
-	this->VisibleImportance = this->AddVariableFloat("aimbot.importance.visible", "aimbot.importance.visible", "Importance of them being visible.", eCommandFlagsArchived, 1.0f);
+	this->CenterImportance = this->AddVariableFloat("Aimbot.Importance.Center", "aimbot.importance.center", "Importance of them being in the center of the screen", eCommandFlagsArchived, 0.5f);
+	this->AliveImportance = this->AddVariableFloat("Aimbot.Importance.Alive", "aimbot.importance.alive", "Importance of them being alive", eCommandFlagsArchived, 1.0f);
+	this->TeamImportance = this->AddVariableFloat("Aimbot.Importance.Team", "aimbot.importance.team", "Importance of them being on a different team", eCommandFlagsArchived, 1.0f);
+	this->VisibleImportance = this->AddVariableFloat("Aimbot.Importance.Visible", "aimbot.importance.visible", "Importance of them being visible.", eCommandFlagsArchived, 1.0f);
 
 	Hook::SubscribeMember<PostTick>(this, &Aimbot::OnTick);
 	Hook::SubscribeMember<PreLocalPlayerInput>(this, &Aimbot::OnPreLocalPlayerInput);
