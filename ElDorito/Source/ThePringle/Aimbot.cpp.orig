@@ -1,6 +1,9 @@
 #include "Aimbot.hpp"
-#include "Util.hpp"
+<<<<<<< HEAD
 #include "Halo/Halo.hpp"
+=======
+#include "Util.hpp"
+>>>>>>> hacked
 
 #include <string>  
 
@@ -13,13 +16,15 @@
 #include "../Blam/BlamTypes.hpp"
 #include "../Blam/BlamPlayers.hpp"
 #include "../Blam/BlamObjects.hpp"
+#include "../Blam/Math/RealVector3D.hpp"
 #include "../Console.hpp"
 
 using namespace Pringle;
 using namespace Pringle::Hooks;
 using namespace Modules;
 
-const static auto Unit_GetHeadPosition = (void(__cdecl*)(uint32_t unitObjectIndex, Vector* position))(0x00B439D0);
+
+const static auto Unit_GetHeadPosition = (void(__cdecl*)(uint32_t unitObjectIndex, Vector *position))(0x00B439D0);
 
 void Aimbot::Initalize()
 {
@@ -38,7 +43,6 @@ Aimbot::Aimbot() : ModuleBase("pringle")
 	this->CenterImportance = this->AddVariableFloat("aimbot.importance.center", "aimbot.importance.center", "Importance of them being in the center of the screen", eCommandFlagsArchived, 0.5f);
 	this->AliveImportance = this->AddVariableFloat("aimbot.importance.alive", "aimbot.importance.alive", "Importance of them being alive", eCommandFlagsArchived, 1.0f);
 	this->TeamImportance = this->AddVariableFloat("aimbot.importance.team", "aimbot.importance.team", "Importance of them being on a different team", eCommandFlagsArchived, 1.0f);
-	this->VisibleImportance = this->AddVariableFloat("aimbot.importance.visible", "aimbot.importance.visible", "Importance of them being visible.", eCommandFlagsArchived, 1.0f);
 
 	Hook::SubscribeMember<PostTick>(this, &Aimbot::OnTick);
 	Hook::SubscribeMember<AimbotEvents::GetTargets>(this, &Aimbot::GetPlayers);
@@ -46,7 +50,6 @@ Aimbot::Aimbot() : ModuleBase("pringle")
 	Hook::SubscribeMember<AimbotEvents::ScoreTarget>(this, &Aimbot::ScoreCenter);
 	Hook::SubscribeMember<AimbotEvents::ScoreTarget>(this, &Aimbot::ScoreAlive);
 	Hook::SubscribeMember<AimbotEvents::ScoreTarget>(this, &Aimbot::ScoreTeam);
-	Hook::SubscribeMember<AimbotEvents::ScoreTarget>(this, &Aimbot::ScoreVisible);
 }
 
 void Aimbot::GetPlayers(const AimbotEvents::GetTargets& msg)
@@ -69,34 +72,42 @@ void Aimbot::GetPlayers(const AimbotEvents::GetTargets& msg)
 		if (!unit)
 			continue;
 
+<<<<<<< HEAD
+		if (it->DeadSlaveUnit)
+			continue;
+
+		if (it->Properties.TeamIndex == players.Get(localplayerhandle)->Properties.TeamIndex)
+			continue;
+
+		auto localPlayerUnitIndex = players.Get(localplayerhandle)->SlaveUnit;
+
+		Vector playerPos;
+		Vector targetPos;
+
+		Unit_GetHeadPosition(localPlayerUnitIndex, &playerPos);
+		Unit_GetHeadPosition(unitObjectIndex, &targetPos);
+
+		if (!Halo::SimpleHitTest(&playerPos, &targetPos, localPlayerUnitIndex, -1))
+			continue;
+
+		msg.Targets.emplace_back(unit->Position, unit->Velocity);
+=======
 		QAngle null_viewang = QAngle(Quaternion::Identity());
-		AimbotEvents::Target::Info info(
+		AimbotEvents::Target::Info info = {
 			/*Velocity =*/ reinterpret_cast<Vector&>(unit->Velocity),
-			/*ShootDirection =*/ reinterpret_cast<Vector&>(unit->Forward),
 			/*ViewAngles =*/ null_viewang,
 			/*Team =*/ it->Properties.TeamIndex,
-			/*UnitIndex =*/ unitObjectIndex,
 			/*Alive =*/ !it->DeadSlaveUnit,
 			/*Player =*/ true
+		};
+		
+		AimbotEvents::Target target(
+			reinterpret_cast<Vector&>(unit->Position),
+			info
 		);
-		
-		Vector pos;
-		
-		switch (msg.AimAt)
-		{
-		default:
-		case AimbotEvents::AimPosition::Origin:
-			pos = unit->Position;
-			break;
-		case AimbotEvents::AimPosition::Head:
-			Unit_GetHeadPosition(unitObjectIndex, &pos);
-			break;
-		case AimbotEvents::AimPosition::Center:
-			pos = unit->Center;
-			break;
-		}
 
-		msg.GotTarget(AimbotEvents::Target(pos, info));
+		msg.GotTarget(target);
+>>>>>>> hacked
 	}
 
 }
@@ -109,7 +120,7 @@ void Pringle::Aimbot::ScoreDistance(const AimbotEvents::ScoreTarget& msg)
 	float point5_at_distance = this->DistanceHalfAt->ValueFloat;
 	float distance_importance = this->DistanceImportance->ValueFloat;
 
-	float distance = (msg.What.Position - msg.Self.Position).Length();
+	float distance = (msg.What.Position - this->CachedLocalPosition).Length();
 	msg.Importance *= 
 		AimbotEvents::ScoreTarget::Calculate(
 			point5_at_distance / (point5_at_distance + distance),
@@ -118,8 +129,8 @@ void Pringle::Aimbot::ScoreDistance(const AimbotEvents::ScoreTarget& msg)
 
 void Pringle::Aimbot::ScoreCenter(const AimbotEvents::ScoreTarget& msg)
 {
-	float dot = msg.Self.Information.ShootDirection
-		.Dot(msg.What.Position - msg.Self.Position);
+	float dot = this->CachedAimDirection
+		.Dot(msg.What.Position - this->CachedLocalPosition);
 	float perc = (dot + 1.0f) * 0.5f;
 
 	msg.Importance *= 
@@ -132,7 +143,7 @@ void Pringle::Aimbot::ScoreAlive(const AimbotEvents::ScoreTarget& msg)
 {
 	msg.Importance *=
 		AimbotEvents::ScoreTarget::Calculate(
-			msg.What.Information.Alive ? 1.0f : 0.0f,
+			msg.What.Information.Alive ? 1 : 0,
 			this->AliveImportance->ValueFloat);
 }
 
@@ -140,19 +151,8 @@ void Pringle::Aimbot::ScoreTeam(const AimbotEvents::ScoreTarget& msg)
 {
 	msg.Importance *=
 		AimbotEvents::ScoreTarget::Calculate(
-			msg.What.Information.Team == msg.Self.Information.Team ? 0.0f : 1.0f,
+			msg.What.Information.Team == this->CachedTeam ? 0 : 1,
 			this->TeamImportance->ValueFloat);
-}
-
-void Pringle::Aimbot::ScoreVisible(const AimbotEvents::ScoreTarget& msg)
-{
-	//bool visible = Halo::SimpleHitTest(&playerPos, &targetPos, localPlayerUnitIndex, -1));
-	bool visible = Halo::SimpleHitTest(msg.Self.Position, msg.What.Position, msg.Self.Information.UnitIndex, msg.What.Information.UnitIndex);
-
-	msg.Importance *=
-		AimbotEvents::ScoreTarget::Calculate(
-			visible ? 1 : 0,
-			this->VisibleImportance->ValueFloat);
 }
 
 static double Scale(double x, double from_min, double from_max, double to_min, double to_max)
@@ -185,27 +185,9 @@ void Aimbot::OnTick(const PostTick& msg)
 	float pitch = pitchptr.Read<float>();
 	float yaw = yawptr.Read<float>();
 	
-	//this->CachedLocalPosition = localplayerunit->Position;
-	//this->CachedAimDirection = Vector(Angle::Radians(pitch), Angle::Radians(yaw));
-	//this->CachedTeam = localplayer->Properties.TeamIndex;
-
-	Vector shootpos;
-	Unit_GetHeadPosition(localplayer->SlaveUnit, &shootpos);
-
-	Vector shootdir = Vector(Angle::Radians(pitch), Angle::Radians(yaw)); // TODO: localplayerunit->Forward
-	
-	QAngle null_viewang = QAngle(Quaternion::Identity());
-	AimbotEvents::Target::Info selfinfo(
-		/*Velocity =*/ reinterpret_cast<Vector&>(localplayerunit->Velocity),
-		/*ShootDirection =*/ shootdir,
-		/*ViewAngles =*/ null_viewang,
-		/*Team =*/ localplayer->Properties.TeamIndex,
-		/*UnitIndex =*/ localplayer->SlaveUnit.Handle,
-		/*Alive =*/ !localplayer->DeadSlaveUnit,
-		/*Player =*/ true
-	);
-
-	AimbotEvents::Target self(shootpos, selfinfo);
+	this->CachedLocalPosition = localplayerunit->Position;
+	this->CachedAimDirection = Vector(Angle::Radians(pitch), Angle::Radians(yaw));
+	this->CachedTeam = localplayer->Properties.TeamIndex;
 
 	if (this->Enabled->ValueInt != 0)
 	{
@@ -216,7 +198,7 @@ void Aimbot::OnTick(const PostTick& msg)
 		Hook::Call<AimbotEvents::GetTargets>([&](const AimbotEvents::Target& targ) -> void
 		{
 			float score = 0;
-			Hook::Call<AimbotEvents::ScoreTarget>(self, targ, score);
+			Hook::Call<AimbotEvents::ScoreTarget>(targ, score);
 
 			if (score > best_score)
 			{
@@ -224,16 +206,33 @@ void Aimbot::OnTick(const PostTick& msg)
 				best_pos = targ.Position;
 				best_got = true;
 			}
-		}, AimbotEvents::AimPosition::Center);
+		}, AimbotEvents::AimPosition::CenterMass);
 
+<<<<<<< HEAD
+		}
+
+		Vector dir = localpos - besttarget.Position;
+		float len = std::sqrt(dir.I*dir.I + dir.J*dir.J + dir.K*dir.K);
+
+		dir /= len;
+
+		yaw = std::atan2(dir.J, dir.I);
+		pitch = -std::asin(dir.K);
+
+		yaw += 3.14159f;
+	
+		pitchptr.WriteFast(pitch);
+		yawptr.WriteFast(yaw);
+=======
 		if (!best_got)
 			return;
 		
-		Vector dir = (best_pos - shootpos).Normal();
+		Vector dir = (best_pos - this->CachedLocalPosition).Normal();
 		EulerAngles ang = dir.Angles();
 
 		pitchptr.WriteFast(ang.Pitch.AsRadians());
 		yawptr.WriteFast(ang.Yaw.AsRadians());
+>>>>>>> hacked
 	}
 }
 

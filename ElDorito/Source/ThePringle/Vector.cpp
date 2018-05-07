@@ -17,7 +17,7 @@ namespace Pringle
 	Vector::Vector(float x, float y, float z) :
 		X(x), Y(y), Z(z)
 	{}
-	Vector::Vector(const Blam::Math::RealVector3D & other) :
+	Vector::Vector(const Blam::Math::RealVector3D& other) :
 		Vector(other.I, other.J, other.K)
 	{}
 	Vector::Vector(const D3DXVECTOR3 & other) :

@@ -161,7 +161,7 @@ namespace Pringle
 {
 	static bool isMainMenu = true;
 
-	const static auto Unit_GetHeadPosition = (void(__cdecl*)(uint32_t unitObjectIndex, Vector* position))(0x00B439D0);
+	const static auto Unit_GetHeadPosition = (void(__cdecl*)(uint32_t unitObjectIndex, Math::RealVector3D *position))(0x00B439D0);
 
 	ESP::ESP() : ModuleBase("pringle")
 	{
@@ -281,13 +281,12 @@ namespace Pringle
 		if (!unit)
 			return;
 
-		Vector pos;
+		Math::RealVector3D pos;
 		Unit_GetHeadPosition(pl->SlaveUnit, &pos);
 
-		*headPos = pos;
-		/*headPos->x = pos.I;
+		headPos->x = pos.I;
 		headPos->y = pos.J;
-		headPos->z = pos.K;*/
+		headPos->z = pos.K;
 	}
 
 	void ToScreen(Vector& pos, Vector& out)
@@ -301,7 +300,7 @@ namespace Pringle
 		out.Y = project.projected_y;
 	}
 
-	void ESP::Draw(const DirectX::EndScene& msg, Blam::Objects::ObjectBase* unit, uint32_t color)
+	void ESP::Draw(const DirectX::EndScene & msg, Blam::Objects::ObjectBase* unit, uint32_t color)
 	{
 		Vector pos = unit->Position, screen;
 		ToScreen(pos, screen);
@@ -309,7 +308,7 @@ namespace Pringle
 		DrawRect(msg.Device, screen.X, screen.Y, 5, 5, color);
 	}
 
-	void ESP::Draw(const DirectX::EndScene& msg, Blam::Math::RealVector3D _pos, uint32_t color)
+	void ESP::Draw(const DirectX::EndScene & msg, Blam::Math::RealVector3D _pos, uint32_t color)
 	{
 		Vector pos = _pos;
 		Vector screen;
@@ -356,7 +355,7 @@ namespace Pringle
 		}
 	}
 
-	void ESP::DrawObjects(const DirectX::EndScene& msg)
+	void ESP::DrawObjects(const DirectX::EndScene & msg)
 	{
 		std::lock_guard<std::mutex> lock(this->unit_mutex);
 
@@ -454,7 +453,11 @@ namespace Pringle
 		this->DrawObjects(msg);
 	}
 
-	void ESP::UpdatePlayers(const Hooks::PreTick& msg)
+<<<<<<< HEAD
+	void ESP::UpdatePlayers(const Hooks::PreTick & msg)
+=======
+	void ESP::OnPreTick(const Hooks::PreTick& msg)
+>>>>>>> hacked
 	{
 		ally_player_units.clear();
 		enemy_player_units.clear();
@@ -468,6 +471,9 @@ namespace Pringle
 
 		auto localPlayerUnit = Objects::Get(localPlayer->SlaveUnit);
 		if (!localPlayerUnit)
+			return;
+
+		if (localPlayer == nullptr)
 			return;
 
 		for (auto it = players.begin(); it != players.end(); ++it) {
@@ -487,13 +493,13 @@ namespace Pringle
 
 			if (it->Properties.TeamIndex != localPlayer->Properties.TeamIndex)
 			{
-				Vector playerPos;
-				Vector targetPos;
+				Math::RealVector3D playerPos;
+				Math::RealVector3D targetPos;
 
 				Unit_GetHeadPosition(localPlayer->SlaveUnit, &playerPos);
 				Unit_GetHeadPosition(unitObjectIndex, &targetPos);
 
-				if (Halo::SimpleHitTest(playerPos, targetPos, localPlayer->SlaveUnit, -1)) {
+				if (Halo::SimpleHitTest(&playerPos, &targetPos, localPlayer->SlaveUnit, -1)) {
 	
 					hit_enemy_player_units.push_back(unit);
 				}
@@ -505,7 +511,7 @@ namespace Pringle
 		}
 	}
 
-	void ESP::UpdateObjects(const Hooks::PreTick& msg, Blam::Players::PlayerDatum* localPlayer, Blam::Objects::ObjectBase* localPlayerUnit)
+	void ESP::UpdateObjects(const Hooks::PreTick & msg, Blam::Players::PlayerDatum* localPlayer, Blam::Objects::ObjectBase* localPlayerUnit)
 	{
 		objects.clear();
 		hit_objects.clear();
@@ -528,12 +534,12 @@ namespace Pringle
 			//	continue;
 
 			{
-				Vector localPos = localPlayerUnit->Position;
-				localPos.Z += .75f;
-				Vector targetPos = unit->Position;
+				Math::RealVector3D localPos = localPlayerUnit->Position;
+				localPos.K += .75f;
+				Math::RealVector3D targetPos = unit->Position;
 				//targetPos.K += 1.0f;
 
-				if (Halo::SimpleHitTest(localPos, targetPos, localPlayer->SlaveUnit /*-1*/, /*unitObjectIndex*/ -1))
+				if (Halo::SimpleHitTest(&localPos, &targetPos, localPlayer->SlaveUnit /*-1*/, /*unitObjectIndex*/ -1))
 				{
 					//this->hit_points.push_back({ localPos, targetPos });
 					this->hit_objects.push_back(unit);
