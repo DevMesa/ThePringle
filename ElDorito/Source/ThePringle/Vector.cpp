@@ -29,17 +29,17 @@ namespace Pringle
 	{
 	}
 
-	/*inline*/ float Vector::LengthSequared() const
+	float Vector::LengthSequared() const
 	{
 		return this->X * this->X + this->Y * this->Y + this->Z * this->Z;
 	}
 
-	inline float Vector::Length() const
+	float Vector::Length() const
 	{
 		return std::sqrt(this->LengthSequared());
 	}
 
-	inline Vector& Vector::Normalize()
+	Vector& Vector::Normalize()
 	{
 		float len = this->Length();
 
