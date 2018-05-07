@@ -15,7 +15,6 @@ namespace Pringle
 		public Modules::ModuleBase
 	{
 	public:
-		static void Initalize();
 		Aimbot();
 
 	protected:

@@ -22,11 +22,6 @@ using namespace Modules;
 
 const static auto Unit_GetHeadPosition = (void(__cdecl*)(uint32_t unitObjectIndex, Vector* position))(0x00B439D0);
 
-void Aimbot::Initalize()
-{
-	static Aimbot AimbotInstance;
-}
-
 Aimbot::Aimbot() : ModuleBase("pringle")
 {
 	this->Enabled = this->AddVariableInt("aimbot.enabled", "aimbot.enabled", "Enable the hack", eCommandFlagsArchived, 0);

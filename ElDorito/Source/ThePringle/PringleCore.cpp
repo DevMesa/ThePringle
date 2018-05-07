@@ -44,7 +44,7 @@ namespace Pringle
 		SetupTickHook();
 
 		SpeedHack::Instance();
-		Aimbot::Initalize();
+		Aimbot::Instance();
 		ESP::Instance();
 		ServiceTagMod::Instance();
 		NoclipHack::Instance();
