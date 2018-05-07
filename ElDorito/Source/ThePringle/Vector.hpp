@@ -55,6 +55,8 @@ namespace Pringle
 		EulerAngles Angles() const;
 		bool ToScreen(const Vector& cam_pos, const QAngle& cam_ang, Angle fov, float width, float height, float& out_x, float& out_y) const;
 
+		Vector Right() const;
+
 		// generate the various operations
 #define BINOP(OP) \
 		inline Vector operator##OP(const Vector& other) const \

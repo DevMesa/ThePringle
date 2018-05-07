@@ -48,6 +48,9 @@ namespace Pringle
 			ModifyGravityMultiplier(float& gravity) : Gravity(gravity) { }
 		};
 		
+		struct PreLocalPlayerInput { };
+		struct PostLocalPlayerInput { };
+
 		namespace AimbotEvents
 		{
 			struct AimPosition

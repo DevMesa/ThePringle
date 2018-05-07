@@ -19,11 +19,15 @@ namespace Pringle
 		Aimbot();
 
 	protected:
-		/*Vector CachedLocalPosition;
-		int CachedTeam;
-		Vector CachedAimDirection;*/
+		Vector LastSelfPosition;
+		Vector LastTargetPosition;
+		int LastTargetUnitIndex;
+		bool LastSelfPositionFresh;
+		bool Shoot;
+		bool ShotLast;
 
 		Modules::Command* Enabled;
+		Modules::Command* AutoShoot;
 		Modules::Command* X;
 		Modules::Command* Y;
 
@@ -39,6 +43,7 @@ namespace Pringle
 		Modules::Command* VisibleImportance;
 
 		void OnTick(const Hooks::PostTick& msg);
+		void OnPreLocalPlayerInput(const Hooks::PreLocalPlayerInput& msg);
 		void GetPlayers(const Hooks::AimbotEvents::GetTargets& msg);
 
 		void ScoreDistance(const Hooks::AimbotEvents::ScoreTarget& msg);

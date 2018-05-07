@@ -1,4 +1,7 @@
 #define _USE_MATH_DEFINES
+
+#include "../ThePringle/Hooks.hpp"
+
 #include "Input.hpp"
 #include <stack>
 #include <cmath>
@@ -620,7 +623,11 @@ namespace
 			}
 		}
 
+		Pringle::Hook::Call<Pringle::Hooks::PreLocalPlayerInput>();
+
 		LocalPlayerInputHook(localPlayerIndex, playerIndex, a3, a4, a5, state);
+
+		Pringle::Hook::Call<Pringle::Hooks::PostLocalPlayerInput>();
 
 		if (moduleInput.VarToggleSprint->ValueInt)
 		{

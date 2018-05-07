@@ -126,4 +126,8 @@ namespace Pringle
 			0.0f <= out_x && out_x <= width &&
 			0.0f <= out_y && out_y <= height;
 	}
+	Vector Vector::Right() const
+	{
+		return Vector(this->X, this->Y, 0.0f).Cross(Vector::Up());
+	}
 }
