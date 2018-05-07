@@ -13,6 +13,7 @@
 #include "../Blam/BlamTypes.hpp"
 #include "../Blam/BlamPlayers.hpp"
 #include "../Blam/BlamObjects.hpp"
+#include "../Blam/BlamInput.hpp"
 #include "../Console.hpp"
 
 using namespace Pringle;
@@ -29,6 +30,7 @@ void Aimbot::Initalize()
 Aimbot::Aimbot() : ModuleBase("pringle")
 {
 	this->Enabled = this->AddVariableInt("aimbot.enabled", "aimbot.enabled", "Enable the hack", eCommandFlagsArchived, 0);
+	this->AutoShoot = this->AddVariableInt("aimbot.autoshoot", "aimbot.autoshoot", "Enable autoshooting", eCommandFlagsArchived, 1);
 	this->X = this->AddVariableInt("aimbot.x", "aimbot.x", "Enable the hack", eCommandFlagsArchived, 0);
 	this->Y = this->AddVariableFloat("aimbot.y", "aimbot.y", "Enable the hack", eCommandFlagsArchived, 0);
 	
@@ -43,6 +45,7 @@ Aimbot::Aimbot() : ModuleBase("pringle")
 	this->VisibleImportance = this->AddVariableFloat("aimbot.importance.visible", "aimbot.importance.visible", "Importance of them being visible.", eCommandFlagsArchived, 1.0f);
 
 	Hook::SubscribeMember<PostTick>(this, &Aimbot::OnTick);
+	Hook::SubscribeMember<PreLocalPlayerInput>(this, &Aimbot::OnPreLocalPlayerInput);
 	Hook::SubscribeMember<AimbotEvents::GetTargets>(this, &Aimbot::GetPlayers);
 	Hook::SubscribeMember<AimbotEvents::ScoreTarget>(this, &Aimbot::ScoreDistance);
 	Hook::SubscribeMember<AimbotEvents::ScoreTarget>(this, &Aimbot::ScoreCenter);
@@ -92,6 +95,9 @@ void Aimbot::GetPlayers(const AimbotEvents::GetTargets& msg)
 			break;
 		case AimbotEvents::AimPosition::Head:
 			Unit_GetHeadPosition(unitObjectIndex, &pos);
+			pos += info.ShootDirection * 0.05f; // forward ness for the head pos
+			pos += info.ShootDirection.Right() * 0.05f;
+			pos += Vector::Down() * 0.01f;
 			break;
 		case AimbotEvents::AimPosition::Center:
 			pos = unit->Center;
@@ -168,6 +174,14 @@ static double Scale(double x, double from_min, double from_max, double to_min, d
 
 void Aimbot::OnTick(const PostTick& msg)
 {
+	this->Shoot = false;
+	if (this->Enabled->ValueInt == 0)
+	{
+		this->LastSelfPositionFresh = false;
+		this->LastTargetUnitIndex = 0;
+		return;
+	}
+
 	const auto& localplayerphandle = Blam::Players::GetLocalPlayer(0);
 	const auto& localplayer = Blam::Players::GetPlayers().Get(localplayerphandle);
 
@@ -186,13 +200,23 @@ void Aimbot::OnTick(const PostTick& msg)
 
 	float pitch = pitchptr.Read<float>();
 	float yaw = yawptr.Read<float>();
-	
-	//this->CachedLocalPosition = localplayerunit->Position;
-	//this->CachedAimDirection = Vector(Angle::Radians(pitch), Angle::Radians(yaw));
-	//this->CachedTeam = localplayer->Properties.TeamIndex;
 
 	Vector shootpos;
 	Unit_GetHeadPosition(localplayer->SlaveUnit, &shootpos);
+
+	{ // delta for shootpos
+		if (this->LastSelfPositionFresh)
+		{
+			Vector copy = shootpos;
+			shootpos += (shootpos - this->LastSelfPosition);
+			this->LastSelfPosition = copy;
+		}
+		else
+		{
+			this->LastSelfPosition = shootpos;
+			this->LastSelfPositionFresh = true;
+		}
+	}
 
 	Vector shootdir = Vector(Angle::Radians(pitch), Angle::Radians(yaw)); // TODO: localplayerunit->Forward
 	
@@ -209,9 +233,9 @@ void Aimbot::OnTick(const PostTick& msg)
 
 	AimbotEvents::Target self(shootpos, selfinfo);
 
-	if (this->Enabled->ValueInt != 0)
 	{
 		Vector best_pos;
+		int best_unitindex = 0;
 		float best_score = std::numeric_limits<float>::epsilon(); // the lowest score we will accept
 		bool best_got = false;
 
@@ -233,18 +257,59 @@ void Aimbot::OnTick(const PostTick& msg)
 			{
 				best_score = score;
 				best_pos = targ.Position;
+				best_unitindex = targ.Information.UnitIndex;
 				best_got = true;
 			}
 		}, aimpos);
 
 		if (!best_got)
+		{
+			this->LastTargetUnitIndex = 0;
 			return;
+		}
 		
+		// delta positions
+		{
+			if (best_unitindex == this->LastTargetUnitIndex)
+			{
+				Vector copy = best_pos;
+				best_pos += (best_pos - this->LastTargetPosition);
+				this->LastTargetPosition = copy;
+
+				// shoot is here so we use the non-laggy position for shooting
+				this->Shoot = this->AutoShoot->ValueInt != 0;
+			}
+			else
+			{
+				this->LastTargetUnitIndex = best_unitindex;
+				this->LastTargetPosition = best_pos;
+			}
+		}
+
 		Vector dir = (best_pos - shootpos).Normal();
 		EulerAngles ang = dir.Angles();
 
 		pitchptr.WriteFast(ang.Pitch.AsRadians());
 		yawptr.WriteFast(ang.Yaw.AsRadians());
+	}
+}
+
+void Pringle::Aimbot::OnPreLocalPlayerInput(const Hooks::PreLocalPlayerInput & msg)
+{
+	if (!this->Shoot)
+		return;
+
+	if (this->ShotLast) // semi auto fix, spams shoot instead, todo, check if automatic gun
+	{
+		auto test = Blam::Input::GetActionState(Blam::Input::eGameActionFireRight);
+		test->Msec = test->Ticks = 0;
+		this->ShotLast = false;
+	}
+	else
+	{
+		auto test = Blam::Input::GetActionState(Blam::Input::eGameActionFireRight);
+		test->Msec = test->Ticks = 1;
+		this->ShotLast = true;
 	}
 }
 
