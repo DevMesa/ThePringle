@@ -8,10 +8,6 @@
 #include "../Modules/ModuleBase.hpp"
 #include "../Utils/Singleton.hpp"
 
-//using namespace Pringle;
-//using namespace Pringle::Hooks;
-//using namespace Modules;
-
 namespace Pringle
 {
 	class Aimbot :
@@ -23,16 +19,31 @@ namespace Pringle
 		Aimbot();
 
 	protected:
+		/*Vector CachedLocalPosition;
+		int CachedTeam;
+		Vector CachedAimDirection;*/
+
 		Modules::Command* Enabled;
 		Modules::Command* X;
 		Modules::Command* Y;
 
-		bool HitTest(Blam::Math::RealVector3D start, Blam::Math::RealVector3D end);
+		Modules::Command* DistanceHalfAt;
+		Modules::Command* DistanceImportance;
 
-		void OnTick(const Pringle::Hooks::PostTick& msg);
+		Modules::Command* CenterImportance;
 
-		std::vector<Pringle::Hooks::GetTargets::Target> CachedTargets;
-		void OnGetTargets(const Pringle::Hooks::GetTargets& msg);
+		Modules::Command* AliveImportance;
+		Modules::Command* TeamImportance;
+		Modules::Command* VisibleImportance;
+
+		void OnTick(const Hooks::PostTick& msg);
+		void GetPlayers(const Hooks::AimbotEvents::GetTargets& msg);
+
+		void ScoreDistance(const Hooks::AimbotEvents::ScoreTarget& msg);
+		void ScoreCenter(const Hooks::AimbotEvents::ScoreTarget& msg);
+		void ScoreAlive(const Hooks::AimbotEvents::ScoreTarget& msg);
+		void ScoreTeam(const Hooks::AimbotEvents::ScoreTarget& msg);
+		void ScoreVisible(const Hooks::AimbotEvents::ScoreTarget& msg);
 	};
 }
 

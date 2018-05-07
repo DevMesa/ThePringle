@@ -54,8 +54,7 @@ namespace Pringle
 			{
 				enum Enum
 				{
-					Origin,
-					Center,
+					CenterMass,
 					Head
 				};
 			};
@@ -65,27 +64,28 @@ namespace Pringle
 			// but if it's on, return team members, even if team members are later ignored
 			struct Target
 			{
+<<<<<<< HEAD
+				Blam::Math::RealVector3D Origin;
+				Blam::Math::RealVector3D Position;
+				Blam::Math::RealVector3D Velocity; // projectiles will need this
+				AimPosition::Enum AimPart;			
+				float Priority;
+
+				Target(
+					const Blam::Math::RealVector3D& pos,
+					const Blam::Math::RealVector3D& vel,
+					AimPosition::Enum                aimpart   = AimPosition::CenterMass,
+					float                            priority  = 0.0f
+				) :
+=======
 				struct Info
 				{
 					const Vector& Velocity;
-					const Vector& ShootDirection;
 					const QAngle& ViewAngles;
 
 					const int Team;
-					const uint32_t UnitIndex;
 					const bool Alive : 1;
 					const bool Player : 1;
-
-					Info(const Vector& vel, const Vector& shootdir, const QAngle& angs, int team, int unitindex, bool alive, bool player) :
-						Velocity(vel),
-						ShootDirection(shootdir),
-						ViewAngles(angs),
-						Team(team),
-						UnitIndex(unitindex),
-						Alive(alive),
-						Player(player)
-					{
-					}
 				};
 
 				// make a copy of this as it's mutable
@@ -93,6 +93,7 @@ namespace Pringle
 				const Info& Information;
 
 				Target(const Vector& pos, const Info& info) :
+>>>>>>> hacked
 					Position(pos),
 					Information(info)
 				{}
@@ -100,7 +101,6 @@ namespace Pringle
 
 			struct ScoreTarget
 			{
-				const Target& Self;
 				const Target& What;
 				float& Importance;
 
@@ -110,8 +110,7 @@ namespace Pringle
 					return (1.0f - importance) + value * importance;
 				}
 
-				ScoreTarget(const Target& self, const Target& what, float& out_importance) :
-					Self(self),
+				ScoreTarget(const Target& what, float& out_importance) :
 					What(what),
 					Importance(out_importance)
 				{

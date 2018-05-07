@@ -14,7 +14,7 @@ namespace Pringle
 	struct Vector;
 	struct Quaternion
 	{
-		static Quaternion Identity();;
+		static Quaternion Identity();
 
 		Vector Xyz;
 		float  W;

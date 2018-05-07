@@ -1,16 +1,18 @@
 #pragma once
 
 #include <cstdint>
-#include "../../Blam/Math/RealVector3D.hpp"
+
+//#include "../../Blam/Math/RealVector3D.hpp"
+#include "Vector.hpp"
 
 namespace Halo
 {
 	class trace_result_t
 	{
 	public:
-		Blam::Math::RealVector3D N00000013; //0x0000
+		Pringle::Vector N00000013; //0x0000
 		char pad_000C[8]; //0x000C
-		Blam::Math::RealVector3D N00000016; //0x0014
+		Pringle::Vector N00000016; //0x0014
 		int16_t hit2; //0x0020
 		int16_t hit3; //0x0022
 		int32_t N0000005A; //0x0024
@@ -36,7 +38,23 @@ namespace Halo
 		char pad_0091[43]; //0x0091
 	}; //Size: 0x00BC
 
-	inline bool SimpleHitTest(Blam::Math::RealVector3D* start, Blam::Math::RealVector3D* end, uint32_t unitIndex1, uint32_t unitIndex2)
+	inline bool SimpleHitTest(Pringle::Vector start, Pringle::Vector end, uint32_t unitIndex1, uint32_t unitIndex2)
+	{
+		trace_result_t result;
+
+		result.N00000013 = end - start;
+		end = result.N00000013;
+
+		uint32_t flags1 = (*(uint32_t*)0x471A8F8) | 0x200;
+		uint32_t flags2 = *(uint32_t*)0x471A8FC;
+
+		static const uint32_t addr = 0x6D7160;
+		auto fn = reinterpret_cast<bool(*)(uint32_t, uint32_t, Pringle::Vector*, Pringle::Vector*, uint32_t, uint32_t, trace_result_t*)> (addr);
+		bool fn_result = fn(flags1, flags2, &start, &end, unitIndex1, unitIndex2, &result);
+
+		return !fn_result;
+	}
+	/*inline bool SimpleHitTest(Pringle::Vector* start, Pringle::Vector* end, uint32_t unitIndex1, uint32_t unitIndex2)
 	{
 		trace_result_t result;
 
@@ -47,9 +65,9 @@ namespace Halo
 		uint32_t flags2 = *(uint32_t*)0x471A8FC;
 
 		static const uint32_t addr = 0x6D7160;
-		auto fn = reinterpret_cast<bool(*)(uint32_t, uint32_t, Blam::Math::RealVector3D*, Blam::Math::RealVector3D*, uint32_t, uint32_t, trace_result_t*) > (addr);
+		auto fn = reinterpret_cast<bool(*)(uint32_t, uint32_t, Pringle::Vector*, Pringle::Vector*, uint32_t, uint32_t, trace_result_t*) > (addr);
 		bool fn_result = fn(flags1, flags2, start, end, unitIndex1, unitIndex2, &result);
 
 		return !fn_result;
-	}
+	}*/
 }

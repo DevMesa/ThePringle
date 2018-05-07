@@ -3,6 +3,15 @@
 
 namespace Pringle
 {
+	QAngle QAngle::Identity()
+	{
+		return QAngle();
+	}
+
+	QAngle::QAngle() :
+		Quat(Quaternion::Identity())
+	{
+	}
 	QAngle::QAngle(const Quaternion& quat) :
 		Quat(quat)
 	{

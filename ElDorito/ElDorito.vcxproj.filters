@@ -581,7 +581,13 @@
     <ClCompile Include="Source\ThePringle\ServiceTagMod.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ThePringle\NoclipHack.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
     <ClCompile Include="Source\ThePringle\ESP.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ThePringle\Util.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1323,10 +1329,19 @@
     <ClInclude Include="Source\ThePringle\ServiceTagMod.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
+    <ClInclude Include="Source\ThePringle\Properties.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\NoclipHack.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
     <ClInclude Include="Source\ThePringle\HookEvents.hpp" />
     <ClInclude Include="Source\ThePringle\Quaternion.hpp" />
     <ClInclude Include="Source\ThePringle\Halo\Halo.hpp">
       <Filter>ThePringle\Halo</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\Util.hpp">
+      <Filter>ThePringle</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
