@@ -147,8 +147,8 @@ BOOL InitInstance(HINSTANCE hModule)
 	ElDorito::SetMainThreadID(GetCurrentThreadId());
 
 	Patches::ApplyRequired();
-	ElDorito::Instance().Initialize();
 	Pringle::Core::Initialize();
+	ElDorito::Instance().Initialize();
 
 	Utils::LogEthernetAdapterInfo();
 
