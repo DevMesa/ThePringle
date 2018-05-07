@@ -163,11 +163,11 @@ namespace Pringle
 
 	const static auto Unit_GetHeadPosition = (void(__cdecl*)(uint32_t unitObjectIndex, Vector* position))(0x00B439D0);
 
-	ESP::ESP() : ModuleBase("pringle")
+	ESP::ESP() : ModuleBase("Pringle")
 	{
-		Enabled = this->AddVariableInt("esp.enabled", "esp.enabled", "Enables ESP", eCommandFlagsArchived, 0);
-		Flag1 = this->AddVariableInt("esp.flag1", "esp.flag1", "flag1", eCommandFlagsArchived, 0);
-		Flag2 = this->AddVariableInt("esp.flag2", "esp.flag2", "flag2", eCommandFlagsArchived, 0);
+		Enabled = this->AddVariableInt("ESP.Enabled", "esp.enabled", "Enables ESP", eCommandFlagsArchived, 0);
+		Flag1 = this->AddVariableInt("ESP.Flag1", "esp.flag1", "flag1", eCommandFlagsArchived, 0);
+		Flag2 = this->AddVariableInt("ESP.Flag2", "esp.flag2", "flag2", eCommandFlagsArchived, 0);
 
 		Hook::SubscribeMember<DirectX::EndScene>(this, &ESP::OnEndScene);
 		Hook::SubscribeMember<Hooks::PreTick>(this, &ESP::OnPreTick);

@@ -28,11 +28,11 @@ bool AcceptArgs(const std::vector<std::string>& Arguments, std::string& returnIn
 	return true;
 }
 
-ServiceTagMod::ServiceTagMod() : ModuleBase("pringle")
+ServiceTagMod::ServiceTagMod() : ModuleBase("Pringle")
 {
-	this->Enabled = this->AddVariableInt("tagmod.enabled", "tagmod.enabled", "Enable the hack", eCommandFlagsArchived, 0);
-	this->Delay = this->AddVariableInt("tagmod.delay", "tagmod.delay", "How fast to change", eCommandFlagsArchived, 100);
-	this->Text = this->AddCommand("tagmod.tags", "tagmod.tags", "Set the list of tags", eCommandFlagsArchived, AcceptArgs);
+	this->Enabled = this->AddVariableInt("TagMod.Enabled", "tagmod.enabled", "Enable the hack", eCommandFlagsArchived, 0);
+	this->Delay = this->AddVariableInt("TagMod.Delay", "tagmod.delay", "How fast to change", eCommandFlagsArchived, 100);
+	this->Text = this->AddCommand("TagMod.Tags", "tagmod.tags", "Set the list of tags", eCommandFlagsArchived, AcceptArgs);
 
 	Hook::SubscribeMember<PostTick>(this, &ServiceTagMod::OnPostTick);
 }
