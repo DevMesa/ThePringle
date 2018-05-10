@@ -144,7 +144,7 @@ namespace Pringle
 			ModifyMarkerVisibility(bool& visibility) : Visibility(visibility) { }
 		};
 
-		struct sky_properties_definition // copy/pasted from Forge.cpp line 3345
+		struct sky_properties_data // copy/pasted from Forge.cpp line 3345
 		{
 			uint16_t Flags;
 			uint16_t Unknown;
@@ -186,24 +186,14 @@ namespace Pringle
 		};
 		static_assert(sizeof(sky_properties_definition) == 0xA4, "");
 		using namespace Blam::Tags::Camera;
+		template<typename T>
 		struct RenderEffectEvent 
 		{
-			enum render_type 
-			{
-				Screen,
-				Atmosphere
-			};
-
-			render_type type;
+			static_assert(std::is_same<T, AreaScreenEffect::ScreenEffect>() || std::is_same<T, sky_properties_data>(), "Attempted to use invalid type");
 			bool canceled = false;
-			union
-			{
-				AreaScreenEffect::ScreenEffect* screen_effect_data;
-				sky_properties_definition* atmosphere_data;
-			} effect;
+			T& effect;
 
-			RenderEffectEvent(AreaScreenEffect::ScreenEffect* ptr) : type(Screen) { effect.screen_effect_data = ptr; }
-			RenderEffectEvent(sky_properties_definition* ptr) : type(Atmosphere) { effect.atmosphere_data = ptr; }
+			RenderEffectEvent(T& effectIn) : effect(effectIn) { }
 		};
 	}
 }
