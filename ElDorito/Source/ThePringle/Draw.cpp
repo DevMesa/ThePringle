@@ -162,11 +162,8 @@ namespace Pringle
 
 		GetFont()->DrawTextW(0, text, -1, &rect, DT_NOCLIP | alignment, color);
 	}
-	bool Draw::ToScreen(float x, float y, float
-		
-		
-		
-		z, int & screenX, int & screenY)
+
+	bool Draw::ToScreen(float x, float y, float z, int & screenX, int & screenY)
 	{
 		project_t projection;
 		projection.should_project = true;
