@@ -590,7 +590,7 @@
     <ClCompile Include="Source\ThePringle\Util.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ThePringle\Markers.cpp">
+    <ClCompile Include="Source\ThePringle\Draw.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1344,6 +1344,9 @@
       <Filter>ThePringle\Halo</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\Util.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\Draw.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
   </ItemGroup>
