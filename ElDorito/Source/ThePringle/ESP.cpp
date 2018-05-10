@@ -306,7 +306,7 @@ namespace Pringle
 		Vector pos = unit->Position, screen;
 		ToScreen(pos, screen);
 
-		DrawRect(msg.Device, screen.X, screen.Y, 5, 5, color);
+		DrawRect(msg.Device, (int)screen.X, (int)screen.Y, 5, 5, color);
 	}
 
 	void ESP::Draw(const DirectX::EndScene& msg, Blam::Math::RealVector3D _pos, uint32_t color)
@@ -315,7 +315,7 @@ namespace Pringle
 		Vector screen;
 		ToScreen(pos, screen);
 
-		DrawRect(msg.Device, screen.X, screen.Y, 5, 5, color);
+		DrawRect(msg.Device, (int)screen.X, (int)screen.Y, 5, 5, color);
 	}
 
 	void ESP::DrawPlayers(const DirectX::EndScene & msg)
