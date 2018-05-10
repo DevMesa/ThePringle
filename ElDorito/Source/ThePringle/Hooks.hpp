@@ -2,7 +2,7 @@
 #ifndef PRINGLE_HOOKS
 #define PRINGLE_HOOKS
 
-#include <vector>
+#include <type_traits>
 #include <functional>
 #include <vector>
 #include <algorithm>
@@ -84,6 +84,15 @@ namespace Pringle
 		template<typename T, typename... Args>
 		static void Call(Args&&... args)
 		{
+			// could use overloading to achieve this, but that clutters
+			// intellisense and makes it look like you can do it, well,
+			// until you try and compile it
+			if constexpr (sizeof...(Args) == 1)
+			{
+				static constexpr bool same_type = std::is_same_v< T, std::tuple_element_t<0, std::tuple<Args...>> >;
+				static_assert(!same_type, "Attempting to use Hook::Call<T>(...) with an instantiated event. Use Call<T>(...) where ... is your constructor parameter list or use Hook::CallPremade<T>(const T&)");
+			}
+
 			CallPremade<T>(T(args...));
 		}
 
