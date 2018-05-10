@@ -1,3 +1,5 @@
+#include "../ThePringle/Hooks.hpp"
+
 #include "Forge.hpp"
 #include "../Patch.hpp"
 #include "../Blam/BlamObjects.hpp"
@@ -3040,8 +3042,14 @@ namespace
 					if (t > 1.0f)
 						t = 1.0f;
 
-					FillScreenEffectRenderData(screenEffectDef, t, renderData);
-					sub_682A90(a4, &screenEffectDef.ScreenShader, t, v60, -1, &screenEffectDatum.Unknown2C);
+					// Pringle
+					Pringle::Hooks::RenderEffectEvent event(&screenEffectDef);
+					Pringle::Hook::Call<Pringle::Hooks::RenderEffectEvent>(event);
+					if (!event.canceled) 
+					{
+						FillScreenEffectRenderData(screenEffectDef, t, renderData);
+						sub_682A90(a4, &screenEffectDef.ScreenShader, t, v60, -1, &screenEffectDatum.Unknown2C);
+					}
 				}
 			}
 		}
@@ -3302,6 +3310,7 @@ namespace
 			c_game_engine_object_runtime_manager__on_object_spawned(thisptr, placementIndex, objectIndex);
 	}
 
+	// TODO: Pringle hook
 	void __fastcall CameraFxHook(void *thisptr, void *unused, void *a2)
 	{
 		const auto sub_A3B990 = (void(__thiscall*)(void *thisptr, void *a2))(0xA3B990);
@@ -3434,7 +3443,14 @@ namespace
 			props.FogVelocityX = properties.FogVelocityX;
 			props.FogVelocityY = properties.FogVelocityY;
 			props.FogVelocityZ = properties.FogVelocityZ;
-			sub_671D90(bspIndex, &props, state, 1.0f);
+
+			// Pringle
+			Pringle::Hooks::RenderEffectEvent event((Pringle::Hooks::sky_properties_definition*)&props);
+			Pringle::Hook::Call<Pringle::Hooks::RenderEffectEvent>(event);
+			if (!event.canceled)
+			{
+				sub_671D90(bspIndex, &props, state, 1.0f);
+			}
 		}
 		else
 		{

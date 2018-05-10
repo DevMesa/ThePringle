@@ -9,6 +9,9 @@
 #include "Vector.hpp"
 #include "QAngle.hpp"
 
+#include "Blam\Tags\Camera\AreaScreenEffect.hpp"
+
+
 namespace Pringle
 {
 	namespace Hooks
@@ -139,6 +142,68 @@ namespace Pringle
 		{
 			bool& Visibility;
 			ModifyMarkerVisibility(bool& visibility) : Visibility(visibility) { }
+		};
+
+		struct sky_properties_definition // copy/pasted from Forge.cpp line 3345
+		{
+			uint16_t Flags;
+			uint16_t Unknown;
+			uint32_t Name;
+			float LightSourceY;
+			float LightSourceX;
+			Blam::Math::RealColorRGB FogColor;
+			float Brightness;
+			float FogGradientThreshold;
+			float LightIntensity;
+			float SkyinvisiblilityThroughFog;
+			float Unknown2C;
+			float Unknown30;
+			float LightSourceSpread;
+			float Unknown38;
+			float FogIntensity;
+			float Unknown40;
+			float TintCyan;
+			float TintMagenta;
+			float TintYellow;
+			float FogIntensityCyan;
+			float FogIntensityMagenta;
+			float FogIntensityYellow;
+			float BackgroundColorRed;
+			float BackgroundColorGreen;
+			float BackgroundColorBlue;
+			float TintRed;
+			float TintGreen;
+			float TintBlue;
+			float FogIntensity2;
+			float StartDistance;
+			float EndDistance;
+			float FogVelocityX;
+			float FogVelocityY;
+			float FogVelocityZ;
+			Blam::Tags::TagReference Weather;
+			float Unknown9C;
+			uint32_t UnknownA0;
+		};
+		static_assert(sizeof(sky_properties_definition) == 0xA4, "");
+		using namespace Blam::Tags::Camera;
+		struct RenderEffectEvent 
+		{
+			enum render_type 
+			{
+				Atmosphere,
+				Screen
+			};
+
+			render_type type;
+			bool canceled = false;
+			union
+			{
+				AreaScreenEffect::ScreenEffect* screen_effect_data;
+				sky_properties_definition* atmosphere_data;
+			} effect;
+
+			RenderEffectEvent(AreaScreenEffect::ScreenEffect* ptr) : type(Screen) { effect.screen_effect_data = ptr; }
+			RenderEffectEvent(sky_properties_definition* ptr) : type(Atmosphere) { effect.atmosphere_data = ptr; }
 		};
 	}
 }
