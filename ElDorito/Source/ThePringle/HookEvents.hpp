@@ -190,8 +190,8 @@ namespace Pringle
 		{
 			enum render_type 
 			{
-				Atmosphere,
-				Screen
+				Screen,
+				Atmosphere
 			};
 
 			render_type type;

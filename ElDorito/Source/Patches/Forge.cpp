@@ -3044,7 +3044,7 @@ namespace
 
 					// Pringle
 					Pringle::Hooks::RenderEffectEvent event(&screenEffectDef);
-					Pringle::Hook::Call<Pringle::Hooks::RenderEffectEvent>(event);
+					Pringle::Hook::CallPremade<Pringle::Hooks::RenderEffectEvent>(event);
 					if (!event.canceled) 
 					{
 						FillScreenEffectRenderData(screenEffectDef, t, renderData);
@@ -3446,7 +3446,7 @@ namespace
 
 			// Pringle
 			Pringle::Hooks::RenderEffectEvent event((Pringle::Hooks::sky_properties_definition*)&props);
-			Pringle::Hook::Call<Pringle::Hooks::RenderEffectEvent>(event);
+			Pringle::Hook::CallPremade<Pringle::Hooks::RenderEffectEvent>(event);
 			if (!event.canceled)
 			{
 				sub_671D90(bspIndex, &props, state, 1.0f);
