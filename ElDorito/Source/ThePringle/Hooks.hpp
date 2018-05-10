@@ -96,6 +96,22 @@ namespace Pringle
 			CallPremade<T>(T(args...));
 		}
 
+	private:
+		// for `using BaseType = T;` or `typedef T BaseType`
+		template<typename T>
+		struct HasBaseTypeTrait
+		{
+		private:
+			template<typename U> static std::true_type _(typename U::BaseType*);
+			template<typename U> static std::false_type _(...);
+		public:
+			static constexpr bool Value = decltype(_<T>(0))::value;
+		};
+
+		template<typename T>
+		static constexpr bool HasBaseType = HasBaseTypeTrait<T>::Value;
+
+	public:
 		// for if you want a hook result
 		template<typename T>
 		static void CallPremade(const T& hook)
@@ -105,6 +121,16 @@ namespace Pringle
 			for (auto&& sub : info.Subscribed)
 				if(sub.Enabled)
 					sub.Function(hook);
+
+			if constexpr (HasBaseType<T>)
+			{
+				static_assert(std::is_base_of_v<T::BaseType, T>, "T is not derived from T::BaseType");
+				static_assert(!std::is_same_v<T, T::BaseType>, "T::BaseType can't be the same as T");
+
+				// if is to prevent error spam if one of the above assertions fail
+				if constexpr(std::is_base_of_v<T::BaseType, T> && !std::is_same_v<T, T::BaseType>)
+					CallPremade<T::BaseType>(hook);
+			}
 		}
 
 		template<typename T>
