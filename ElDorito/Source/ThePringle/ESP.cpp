@@ -61,7 +61,9 @@ namespace
 	static void GetOBB(Objects::ObjectBase* data, Pringle::Vector& mins, Pringle::Vector& maxs)
 	{
 		auto bb = Forge::GetObjectBoundingBox(data->TagIndex);
-		Vector pos = data->Position;
+		if (!bb)
+			return;
+		Vector pos = Vector(data->Position);
 
 		mins.X = pos.X + bb->MinX;
 		mins.Y = pos.Y + bb->MinY;
@@ -171,7 +173,11 @@ namespace Pringle
 			if (header.IsNull())
 				continue;
 
-			if (header.Type != Objects::ObjectType::eObjectTypeBiped && header.Type != Objects::ObjectType::eObjectTypeVehicle && header.Type != Objects::ObjectType::eObjectTypeWeapon && header.Type != Objects::ObjectType::eObjectTypeEquipment)
+			if (header.Type != Objects::ObjectType::eObjectTypeBiped 
+				&& header.Type != Objects::ObjectType::eObjectTypeVehicle 
+				&& header.Type != Objects::ObjectType::eObjectTypeWeapon 
+				&& header.Type != Objects::ObjectType::eObjectTypeEquipment
+				&& header.Type != Objects::ObjectType::eObjectTypeProjectile)
 				continue;
 
 			auto unit = header.Data;

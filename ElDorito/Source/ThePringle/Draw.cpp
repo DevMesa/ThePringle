@@ -44,7 +44,7 @@ namespace
 
 		typedef void(__thiscall *world2screen_func)(project_t*, float);
 		world2screen_func world2screen = reinterpret_cast<world2screen_func>(world2screen_addr);
-		world2screen(project, 1.0f);
+		world2screen(project, 0.0f);
 	}
 
 	inline ID3DXFont* get_default_font(LPDIRECT3DDEVICE9 device)
@@ -178,7 +178,6 @@ namespace Pringle
 		screenX = projection.projected_x;
 		screenY = projection.projected_y;
 
-		//return projection.projected_x2 > -1 && projection.projected_x2 <= screenWidth && projection.projected_y2 > -1 && projection.projected_y2 <= screenHeight;
-		return true;
+		return projection.projected_x > -1 && projection.projected_x <= screenWidth && projection.projected_y > -1 && projection.projected_y <= screenHeight;
 	}
 }
