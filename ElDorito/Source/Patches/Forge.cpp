@@ -3044,8 +3044,8 @@ namespace
 
 					// Pringle
 					using namespace Blam::Tags::Camera;
-					Pringle::Hooks::RenderEffectEvent<AreaScreenEffect::ScreenEffect> event(screenEffectDef);
-					Pringle::Hook::CallPremade<Pringle::Hooks::RenderEffectEvent<AreaScreenEffect::ScreenEffect>>(event);
+					Pringle::Hooks::ScreenEffectEvent event(screenEffectDef);
+					Pringle::Hook::CallPremade<Pringle::Hooks::ScreenEffectEvent>(event);
 					if (!event.canceled) 
 					{
 						FillScreenEffectRenderData(screenEffectDef, t, renderData);
@@ -3319,17 +3319,22 @@ namespace
 
 		auto &cameraFxSettings = mapModifierState.CameraFx;
 
-		if (cameraFxSettings.Enabled)
+		// Pringle
+		Pringle::Hooks::CameraEffectEvent event((Pringle::Hooks::camera_fx_settings&)cameraFxSettings);
+		Pringle::Hook::CallPremade<Pringle::Hooks::CameraEffectEvent>(event);
+		if (!event.canceled) 
 		{
-			if (std::abs(mapModifierState.CameraFx.Exposure) > 0.0001f)
-				*(float*)((uint8_t*)thisptr + 0x29C) = cameraFxSettings.Exposure;
-			if (std::abs(cameraFxSettings.LightIntensity) > 0.0001f)
-				*(float*)((uint8_t*)thisptr + 0x1E48) = cameraFxSettings.LightIntensity;
-			if (std::abs(cameraFxSettings.BloomIntensity) > 0.0001f)
-				*(float*)((uint8_t*)thisptr + 0x2A0) = cameraFxSettings.BloomIntensity;
-			if (std::abs(cameraFxSettings.LightBloomIntensity) > 0.0001f)
-				*(float*)(*(uint8_t**)((uint8_t*)thisptr + 0x298) + 0x290) = cameraFxSettings.LightBloomIntensity;
-			
+			if (cameraFxSettings.Enabled)
+			{
+				if (std::abs(mapModifierState.CameraFx.Exposure) > 0.0001f)
+					*(float*)((uint8_t*)thisptr + 0x29C) = cameraFxSettings.Exposure;
+				if (std::abs(cameraFxSettings.LightIntensity) > 0.0001f)
+					*(float*)((uint8_t*)thisptr + 0x1E48) = cameraFxSettings.LightIntensity;
+				if (std::abs(cameraFxSettings.BloomIntensity) > 0.0001f)
+					*(float*)((uint8_t*)thisptr + 0x2A0) = cameraFxSettings.BloomIntensity;
+				if (std::abs(cameraFxSettings.LightBloomIntensity) > 0.0001f)
+				*(float*)(*(uint8_t**)((uint8_t*)thisptr + 0x298) + 0x290) = cameraFxSettings.LightBloomIntensity;	
+			}
 		}
 	}
 
@@ -3446,8 +3451,8 @@ namespace
 			props.FogVelocityZ = properties.FogVelocityZ;
 
 			// Pringle
-			Pringle::Hooks::RenderEffectEvent<Pringle::Hooks::sky_properties_definition> event((Pringle::Hooks::sky_properties_definition&)props);
-			Pringle::Hook::CallPremade<Pringle::Hooks::RenderEffectEvent<Pringle::Hooks::sky_properties_definition>>(event);
+			Pringle::Hooks::FogEffectEvent event((Pringle::Hooks::sky_properties_data&)props);
+			Pringle::Hook::CallPremade<Pringle::Hooks::FogEffectEvent>(event);
 			if (!event.canceled)
 			{
 				sub_671D90(bspIndex, &props, state, 1.0f);

@@ -50,7 +50,7 @@ namespace Pringle
 			float& Gravity;
 			ModifyGravityMultiplier(float& gravity) : Gravity(gravity) { }
 		};
-		
+
 		struct PreLocalPlayerInput { };
 		struct PostLocalPlayerInput { };
 
@@ -184,17 +184,40 @@ namespace Pringle
 			float Unknown9C;
 			uint32_t UnknownA0;
 		};
-		static_assert(sizeof(sky_properties_definition) == 0xA4, "");
-		using namespace Blam::Tags::Camera;
-		template<typename T>
-		struct RenderEffectEvent 
-		{
-			static_assert(std::is_same<T, AreaScreenEffect::ScreenEffect>() || std::is_same<T, sky_properties_data>(), "Attempted to use invalid type");
-			bool canceled = false;
-			T& effect;
-
-			RenderEffectEvent(T& effectIn) : effect(effectIn) { }
+		static_assert(sizeof(sky_properties_data) == 0xA4, "");
+		struct camera_fx_settings {
+			bool Enabled;
+			float Exposure;
+			float LightIntensity;
+			float BloomIntensity;
+			float LightBloomIntensity;
 		};
+
+		using namespace Blam::Tags::Camera;
+
+		struct RenderEffectEvent
+		{
+			bool canceled = false; // set to true to disable effect
+		};
+		struct FogEffectEvent : RenderEffectEvent
+		{
+			sky_properties_data& data;
+
+			FogEffectEvent(sky_properties_data& dataIn) : data(dataIn) {}
+		};
+		struct ScreenEffectEvent : RenderEffectEvent
+		{
+			AreaScreenEffect::ScreenEffect& data;
+
+			ScreenEffectEvent(AreaScreenEffect::ScreenEffect& dataIn) : data(dataIn) {}
+		};
+		struct CameraEffectEvent : RenderEffectEvent
+		{
+			camera_fx_settings& data;
+
+			CameraEffectEvent(camera_fx_settings& dataIn) : data(dataIn) {}
+		};
+
 	}
 }
 
