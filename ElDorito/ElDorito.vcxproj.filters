@@ -593,6 +593,9 @@
     <ClCompile Include="Source\ThePringle\Draw.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ThePringle\FontManager.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Blam\BitStream.hpp">
@@ -1347,6 +1350,9 @@
       <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\Draw.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\FontManager.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
   </ItemGroup>

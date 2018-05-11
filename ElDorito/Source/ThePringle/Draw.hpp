@@ -15,13 +15,13 @@ namespace Pringle
 {
 	struct DrawVertex
 	{
-		float x, y, z, w;
-		uint32_t color;
+		FLOAT x, y, z, w;
+		DWORD color;
 
 		DrawVertex() : x(0), y(0), z(0), w(1.f), color(0) { };
 		DrawVertex(float _x, float _y, float _z, float _w, uint32_t _color) : x(_x), y(_y), z(_z), w(_w), color(_color) { };
 		DrawVertex(float _x, float _y, float _z, uint32_t _color) : DrawVertex(_x, _y, _z, 1.f, _color) { };
-		DrawVertex(float _x, float _y, uint32_t _color) : DrawVertex(_x, _y, 0, 1.f, _color) { };
+		DrawVertex(float _x, float _y, uint32_t _color) : DrawVertex(_x, _y, 0.f, 1.f, _color) { };
 	};
 
 	class Draw
@@ -29,9 +29,11 @@ namespace Pringle
 		LPDIRECT3DDEVICE9 device;
 		ID3DXFont* font;
 		int screenWidth, screenHeight;
+		LPDIRECT3DSTATEBLOCK9 state;
 
 	public:
 		Draw(LPDIRECT3DDEVICE9 device);
+		~Draw();
 
 		LPDIRECT3DDEVICE9 GetDevice() const;
 
@@ -41,14 +43,17 @@ namespace Pringle
 		int GetScreenWidth();
 		int GetScreenHeight();
 
-		void Line(int sx, int sy, int ex, int ey, uint32_t color, bool antialias = false, int width = 1);
+		void CaptureState();
+		void ReleaseState();
+
+		void Line(int sx, int sy, int ex, int ey, uint32_t color);
 		void Rect(int x, int y, int w, int h, uint32_t color);
-		void OutlinedRect(int x, int y, int w, int h, uint32_t color, int lineWidth = 1);
+		void OutlinedRect(int x, int y, int w, int h, uint32_t color);
 
 		void Text(const char* text, int x, int y, uint32_t color, uint32_t alignment = DT_LEFT | DT_BOTTOM);
 		void Text(const wchar_t* text, int x, int y, uint32_t color, uint32_t alignment = DT_LEFT | DT_BOTTOM);
 
-		bool ToScreen(float x, float y, float z, int& screenX, int& screenY);
+		bool ToScreen(float x, float y, float z, int& screenX, int& screenY, float clamp = 0.f);
 	};
 }
 

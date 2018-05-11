@@ -12,6 +12,8 @@
 #include "../Console.hpp"
 #include "../Modules/ModuleSettings.hpp"
 #include "../Forge/ForgeUtil.hpp"
+#include "../Blam/Math/RealMatrix4x3.hpp"
+#include "../Blam/Math/RealQuaternion.hpp"
 
 #include "Vector.hpp"
 #include "QAngle.hpp"
@@ -31,6 +33,7 @@ using namespace Blam;
 namespace
 {
 	const static auto Unit_GetHeadPosition = (void(__cdecl*)(uint32_t unitObjectIndex, Vector* position))(0x00B439D0);
+	const auto GetObjectTransformationMatrix = (void(__cdecl*)(uint32_t objectIndex, Blam::Math::RealMatrix4x3* outMatrix))(0x00B2EC60);
 
 	static Players::PlayerDatum* GetLocalPlayer()
 	{
@@ -58,12 +61,17 @@ namespace
 		return unit;
 	}
 
-	static void GetOBB(Objects::ObjectBase* data, Pringle::Vector& mins, Pringle::Vector& maxs)
+	static void GetOBB(uint32_t index, Objects::ObjectBase* data, Pringle::Vector& mins, Pringle::Vector& maxs)
 	{
 		auto bb = Forge::GetObjectBoundingBox(data->TagIndex);
 		if (!bb)
 			return;
-		Vector pos = Vector(data->Position);
+
+		Math::RealMatrix4x3 objectTransform;
+		GetObjectTransformationMatrix(index, &objectTransform);
+		const auto objectRotation = Math::RealQuaternion::CreateFromRotationMatrix(objectTransform);
+
+		Vector pos = data->Position;// Math::RealVector3D::Transform(data->Center, objectRotation);
 
 		mins.X = pos.X + bb->MinX;
 		mins.Y = pos.Y + bb->MinY;
@@ -91,25 +99,23 @@ namespace Pringle
 		});
 	}
 
-	void ESP::Draw(const DirectX::EndScene& msg, Blam::Objects::ObjectBase* unit, uint32_t color)
+	void ESP::Draw(const DirectX::EndScene& msg, uint32_t index, Blam::Objects::ObjectBase* unit, uint32_t color)
 	{
-		auto draw = msg.Draw;
-
 		Vector mins, maxs;
-		GetOBB(unit, mins, maxs);
+		GetOBB(index, unit, mins, maxs);
 
 		int topX, topY;
-		if (!draw.ToScreen(maxs.X, maxs.Y, maxs.Z, topX, topY))
+		if (!msg.Draw.ToScreen(maxs.X, maxs.Y, maxs.Z, topX, topY))
 			return;
 
 		int botX, botY;
-		if (!draw.ToScreen(mins.X, mins.Y, mins.Z, botX, botY))
+		if (!msg.Draw.ToScreen(mins.X, mins.Y, mins.Z, botX, botY))
 			return;
 
 		int height = (botY - topY);
 		int width = height;
 
-		draw.OutlinedRect(topX, topY, width, height, color);
+		msg.Draw.OutlinedRect(topX, topY, width, height, color);
 	}
 
 	void ESP::Draw(const DirectX::EndScene& msg, Blam::Math::RealVector3D _pos, uint32_t color)
@@ -119,38 +125,7 @@ namespace Pringle
 
 	void ESP::DrawPlayers(const DirectX::EndScene & msg)
 	{
-		auto& players = Players::GetPlayers();
-		auto& localPlayerIndex = Players::GetLocalPlayer(0);
-		auto localPlayer = players.Get(localPlayerIndex);
-		if (!localPlayer)
-			return;
-
-		auto localPlayerUnit = Objects::Get(localPlayer->SlaveUnit);
-		if (!localPlayerUnit)
-			return;
-
-		for (auto it = ally_player_units.begin(); it != ally_player_units.end(); ++it) 
-		{
-			auto unit = *it;
-			uint32_t color = D3DCOLOR_RGBA(100, 100, 255, 255);
-			this->Draw(msg, unit, color);
-		}
-
-		for (auto it = enemy_player_units.begin(); it != enemy_player_units.end(); ++it) 
-		{
-			auto unit = *it;
-			uint32_t color = D3DCOLOR_RGBA(255, 100, 100, 255);
-
-			this->Draw(msg, unit, color);
-		}
-
-		for (auto it = hit_enemy_player_units.begin(); it != hit_enemy_player_units.end(); ++it)
-		{
-			auto unit = *it;
-			uint32_t color = D3DCOLOR_RGBA(255, 255, 255, 255);
-
-			this->Draw(msg, unit, color);
-		}
+		
 	}
 
 	void ESP::DrawObjects(const DirectX::EndScene& msg)
@@ -187,7 +162,7 @@ namespace Pringle
 
 			uint32_t color = D3DCOLOR_RGBA(0, 255, 0, 150);
 
-			this->Draw(msg, unit, color);
+			this->Draw(msg, it.CurrentDatumIndex.Handle, unit, color);
 		}
 
 		/*
@@ -227,8 +202,12 @@ namespace Pringle
 
 		//std::lock_guard<std::mutex> lock(this->unit_mutex);
 
+		msg.Draw.CaptureState();
+
 		//this->DrawPlayers(msg);
 		this->DrawObjects(msg);
+
+		msg.Draw.ReleaseState();
 	}
 
 	void ESP::UpdatePlayers(const Hooks::PreTick& msg)

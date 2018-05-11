@@ -25,9 +25,9 @@ namespace Pringle
 			struct EndScene
 			{
 				LPDIRECT3DDEVICE9 Device;
-				Pringle::Draw Draw;
+				Pringle::Draw& Draw;
 
-				EndScene(LPDIRECT3DDEVICE9 device) : Device(device), Draw(Pringle::Draw(device)) { }
+				EndScene(LPDIRECT3DDEVICE9 device) : Device(device), Draw(device) { }
 			};
 			struct PreReset {};
 			struct PostReset {};

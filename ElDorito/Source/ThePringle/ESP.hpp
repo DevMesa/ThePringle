@@ -25,7 +25,7 @@ namespace Pringle
 		Modules::Command* Enabled;
 
 	protected:
-		void Draw(const Hooks::DirectX::EndScene & msg, Blam::Objects::ObjectBase* unit, uint32_t color);
+		void Draw(const Hooks::DirectX::EndScene & msg, uint32_t index, Blam::Objects::ObjectBase* unit, uint32_t color);
 		void Draw(const Hooks::DirectX::EndScene & msg, Blam::Math::RealVector3D _pos, uint32_t color);
 		void DrawPlayers(const Hooks::DirectX::EndScene & msg);
 		void DrawObjects(const Hooks::DirectX::EndScene & msg);

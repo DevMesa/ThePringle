@@ -1,24 +1,8 @@
 #include "Draw.hpp"
+#include "FontManager.hpp"
 
 namespace
 {
-	class rect_t
-	{
-	public:
-		uint16_t draw_start_x; //0x0000
-		uint16_t draw_start_y; //0x0002
-		uint16_t draw_end_x; //0x0004
-		uint16_t draw_end_y; //0x0006
-	}; //Size: 0x0008
-
-	class color_t
-	{
-	public:
-		float r; //0x0000
-		float g; //0x0004
-		float b; //0x0008
-	}; //Size: 0x000C
-
 	class project_t
 	{
 	public:
@@ -34,24 +18,17 @@ namespace
 		char pad_0020[16]; //0x0020
 	}; //Size: 0x0030
 
-	void WorldToScreen(project_t *project)
+	typedef void(__thiscall* WorldToScreen_t)(project_t*, float);
+	auto WorldToScreen_ptr = reinterpret_cast<WorldToScreen_t>(0xAD2360);
+
+	void WorldToScreen(project_t *project, float clamp)
 	{
 		static const uint32_t current_view_addr = 0x50DEDF0;
-		static const uint32_t world2screen_addr = 0xAD2360;
 
 		uint8_t** view_ptr = (uint8_t**)current_view_addr;
 		*view_ptr = (uint8_t*)0x050DEE10;
 
-		typedef void(__thiscall *world2screen_func)(project_t*, float);
-		world2screen_func world2screen = reinterpret_cast<world2screen_func>(world2screen_addr);
-		world2screen(project, 0.0f);
-	}
-
-	inline ID3DXFont* get_default_font(LPDIRECT3DDEVICE9 device)
-	{
-		static ID3DXFont* defaultFont = nullptr;
-		if (!defaultFont) D3DXCreateFont(device, 16, 8, 0, 0, false, DEFAULT_CHARSET, OUT_CHARACTER_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, "Verdana", &defaultFont);
-		return defaultFont;
+		WorldToScreen_ptr(project, clamp); // clamp <= 0.f will not clamp projection
 	}
 }
 
@@ -60,9 +37,15 @@ namespace Pringle
 	Draw::Draw(LPDIRECT3DDEVICE9 _device) : device(_device) 
 	{
 		D3DVIEWPORT9 viewport;
-		device->GetViewport(&viewport);
-		screenWidth = static_cast<int>(viewport.Width);
-		screenHeight = static_cast<int>(viewport.Height);
+		this->device->GetViewport(&viewport);
+		this->screenWidth = static_cast<int>(viewport.Width);
+		this->screenHeight = static_cast<int>(viewport.Height);
+		this->state = nullptr;
+	}
+
+	Draw::~Draw()
+	{
+		this->ReleaseState();
 	}
 
 	LPDIRECT3DDEVICE9 Draw::GetDevice() const
@@ -72,7 +55,7 @@ namespace Pringle
 
 	ID3DXFont* Draw::GetFont() const
 	{
-		return !this->font ? get_default_font(this->device) : this->font;
+		return !this->font ? FontManager::Instance().GetFont(device) : this->font;
 	}
 
 	void Draw::SetFont(ID3DXFont* font)
@@ -90,61 +73,103 @@ namespace Pringle
 		return this->screenHeight;
 	}
 
-	void Draw::Line(int sx, int sy, int ex, int ey, uint32_t color, bool antialias, int width)
+	void Draw::CaptureState()
 	{
-		LPD3DXLINE line;
-		D3DXCreateLine(device, &line);
-		D3DXVECTOR2 verts[] = 
+		if (this->state != nullptr)
+			return;
+
+		device->CreateStateBlock(D3DSBT_ALL, &this->state);
+		this->state->Capture();
+	}
+
+	void Draw::ReleaseState()
+	{
+		if (this->state != nullptr)
 		{
-			D3DXVECTOR2(static_cast<float>(sx), static_cast<float>(sy)),
-			D3DXVECTOR2(static_cast<float>(ex), static_cast<float>(ey))
+			this->state->Apply();
+			this->state->Release();
+			this->state = nullptr;
+		}
+	}
+
+	void Draw::Line(int sx, int sy, int ex, int ey, uint32_t color)
+	{
+		DrawVertex verts[] = 
+		{
+			DrawVertex(static_cast<float>(sx), static_cast<float>(sy), color),
+			DrawVertex(static_cast<float>(ex), static_cast<float>(ey), color)
 		};
 
-		line->SetAntialias(antialias);
-		line->SetWidth(static_cast<float>(width));
+		device->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
 
-		line->Begin();
-		line->Draw(verts, _countof(verts), color);
-		line->End();
-		line->Release();
+		device->SetTexture(0, 0);
+		device->SetVertexShader(0);
+		device->SetPixelShader(0);
+
+		device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+		device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+		device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+
+		device->DrawPrimitiveUP(D3DPT_LINELIST, 1, &verts, sizeof(DrawVertex));
 	}
 
 	void Draw::Rect(int x, int y, int w, int h, uint32_t color)
 	{
-		this->Line(x + (w / 2), y, x + (w / 2), y + h, color, false, w);
+		DrawVertex verts[] =
+		{
+			// left
+			DrawVertex(static_cast<float>(x), static_cast<float>(y), color),
+			DrawVertex(static_cast<float>(x), static_cast<float>(y + h), color),
+			DrawVertex(static_cast<float>(x + w), static_cast<float>(y + h), color),
+			// right
+			DrawVertex(static_cast<float>(x + w), static_cast<float>(y + h), color),
+			DrawVertex(static_cast<float>(x + w), static_cast<float>(y), color),
+			DrawVertex(static_cast<float>(x), static_cast<float>(y), color)
+		};
+
+		device->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+
+		device->SetTexture(0, 0);
+		device->SetVertexShader(0);
+		device->SetPixelShader(0);
+
+		device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+		device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+		device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+
+		device->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 2, &verts, sizeof(DrawVertex));
 	}
 
-	void Draw::OutlinedRect(int x, int y, int w, int h, uint32_t color, int lineWidth)
+	void Draw::OutlinedRect(int x, int y, int w, int h, uint32_t color)
 	{
-		if (lineWidth < 1) return;
+		float fx = static_cast<float>(x);
+		float fy = static_cast<float>(y);
+		float fw = static_cast<float>(w);
+		float fh = static_cast<float>(h);
 
-		for (int i = 0; i < lineWidth; i++)
+		DrawVertex verts[] =
 		{
-			LPD3DXLINE line;
-			D3DXCreateLine(device, &line);
+			DrawVertex(fx, fy, color),
+			DrawVertex(fx + fw, fy, color),
+			DrawVertex(fx + fw, fy + fh, color),
+			DrawVertex(fx, fy + fh, color),
+			DrawVertex(fx, fy, color)
+		};
 
-			float px = static_cast<float>(x - i);
-			float pxw = px + static_cast<float>(w + (i * 2));
+		device->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
 
-			float py = static_cast<float>(y - i);
-			float pyh = py + static_cast<float>(h + (i * 2));
+		device->SetTexture(0, 0);
+		device->SetVertexShader(0);
+		device->SetPixelShader(0);
 
-			D3DXVECTOR2 verts[] =
-			{
-				D3DXVECTOR2(px, py),
-				D3DXVECTOR2(pxw, py),
-				D3DXVECTOR2(pxw, pyh),
-				D3DXVECTOR2(px, pyh),
-				D3DXVECTOR2(px, py)
-			};
+		device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+		device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+		device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 
-			line->SetWidth(1.f);
-
-			line->Begin();
-			line->Draw(verts, _countof(verts), color);
-			line->End();
-			line->Release();
-		}
+		device->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &verts, sizeof(DrawVertex));
 	}
 
 	void Draw::Text(const char* text, int x, int y, uint32_t color, uint32_t alignment)
@@ -163,14 +188,14 @@ namespace Pringle
 		GetFont()->DrawTextW(0, text, -1, &rect, DT_NOCLIP | alignment, color);
 	}
 
-	bool Draw::ToScreen(float x, float y, float z, int & screenX, int & screenY)
+	bool Draw::ToScreen(float x, float y, float z, int & screenX, int & screenY, float clamp)
 	{
 		project_t projection;
 		projection.should_project = true;
 		projection.x = x;
 		projection.y = y;
 		projection.z = z;
-		WorldToScreen(&projection);
+		WorldToScreen(&projection, clamp);
 
 		screenX = projection.projected_x;
 		screenY = projection.projected_y;
