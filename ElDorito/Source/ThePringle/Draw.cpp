@@ -144,7 +144,7 @@ namespace Pringle
 
 	void Draw::OutlinedRect(int x, int y, int w, int h, uint32_t color)
 	{
-		float fx = static_cast<float>(x);
+		float fx = static_cast<float>(x); 
 		float fy = static_cast<float>(y);
 		float fw = static_cast<float>(w);
 		float fh = static_cast<float>(h);
