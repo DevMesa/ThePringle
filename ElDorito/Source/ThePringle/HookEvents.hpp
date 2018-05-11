@@ -201,18 +201,21 @@ namespace Pringle
 		};
 		struct FogEffectEvent : RenderEffectEvent
 		{
+			using BaseType = RenderEffectEvent;
 			sky_properties_data& data;
 
 			FogEffectEvent(sky_properties_data& dataIn) : data(dataIn) {}
 		};
 		struct ScreenEffectEvent : RenderEffectEvent
 		{
+			using BaseType = RenderEffectEvent;
 			AreaScreenEffect::ScreenEffect& data;
 
 			ScreenEffectEvent(AreaScreenEffect::ScreenEffect& dataIn) : data(dataIn) {}
 		};
 		struct CameraEffectEvent : RenderEffectEvent
 		{
+			using BaseType = RenderEffectEvent;
 			camera_fx_settings& data;
 
 			CameraEffectEvent(camera_fx_settings& dataIn) : data(dataIn) {}
