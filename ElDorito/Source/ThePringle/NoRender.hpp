@@ -25,4 +25,4 @@ namespace Pringle
 	};
 }
 
-#endif // !__PRINGLE_WELCOMEBOT__
+#endif // !__PRINGLE_NORENDER__

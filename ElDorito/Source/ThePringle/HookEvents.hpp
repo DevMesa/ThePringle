@@ -197,7 +197,7 @@ namespace Pringle
 
 		struct RenderEffectEvent
 		{
-			bool canceled = false; // set to true to disable effect
+			mutable bool canceled = false; // set to true to disable effect
 		};
 		struct FogEffectEvent : RenderEffectEvent
 		{
