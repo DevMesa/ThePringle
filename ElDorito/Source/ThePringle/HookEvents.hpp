@@ -144,6 +144,7 @@ namespace Pringle
 			ModifyMarkerVisibility(bool& visibility) : Visibility(visibility) { }
 		};
 
+		// TODO: use forward declerations here
 		struct sky_properties_data // copy/pasted from Forge.cpp line 3345
 		{
 			uint16_t Flags;
@@ -193,32 +194,33 @@ namespace Pringle
 			float LightBloomIntensity;
 		};
 
-		using namespace Blam::Tags::Camera;
-
 		struct RenderEffectEvent
 		{
 			mutable bool Canceled = false; // set to true to disable effect
 		};
-		struct FogEffectEvent : RenderEffectEvent
+		struct FogEffectEvent :
+			public RenderEffectEvent
 		{
 			using BaseType = RenderEffectEvent;
-			sky_properties_data& data;
+			sky_properties_data& Data;
 
-			FogEffectEvent(sky_properties_data& dataIn) : data(dataIn) {}
+			FogEffectEvent(sky_properties_data& data) : Data(data) {}
 		};
-		struct ScreenEffectEvent : RenderEffectEvent
+		struct ScreenEffectEvent :
+			public RenderEffectEvent
 		{
 			using BaseType = RenderEffectEvent;
-			AreaScreenEffect::ScreenEffect& data;
+			Blam::Tags::Camera::AreaScreenEffect::ScreenEffect& Data;
 
-			ScreenEffectEvent(AreaScreenEffect::ScreenEffect& dataIn) : data(dataIn) {}
+			ScreenEffectEvent(Blam::Tags::Camera::AreaScreenEffect::ScreenEffect& data) : Data(data) {}
 		};
-		struct CameraEffectEvent : RenderEffectEvent
+		struct CameraEffectEvent :
+			public RenderEffectEvent
 		{
 			using BaseType = RenderEffectEvent;
-			camera_fx_settings& data;
+			camera_fx_settings& Data;
 
-			CameraEffectEvent(camera_fx_settings& dataIn) : data(dataIn) {}
+			CameraEffectEvent(camera_fx_settings& data) : Data(data) {}
 		};
 
 	}
