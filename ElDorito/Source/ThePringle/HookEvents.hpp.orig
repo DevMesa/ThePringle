@@ -9,9 +9,12 @@
 #include "Vector.hpp"
 #include "QAngle.hpp"
 
+<<<<<<< HEAD
 #include "../CommandMap.hpp"
-#include "Blam/Tags/Camera/AreaScreenEffect.hpp"
+=======
+#include "Blam\Tags\Camera\AreaScreenEffect.hpp"
 
+>>>>>>> hacked
 
 namespace Pringle
 {
