@@ -3046,7 +3046,7 @@ namespace
 					using namespace Blam::Tags::Camera;
 					Pringle::Hooks::ScreenEffectEvent event(screenEffectDef);
 					Pringle::Hook::CallPremade<Pringle::Hooks::ScreenEffectEvent>(event);
-					if (!event.canceled) 
+					if (!event.Canceled) 
 					{
 						FillScreenEffectRenderData(screenEffectDef, t, renderData);
 						sub_682A90(a4, &screenEffectDef.ScreenShader, t, v60, -1, &screenEffectDatum.Unknown2C);
@@ -3322,7 +3322,7 @@ namespace
 		// Pringle
 		Pringle::Hooks::CameraEffectEvent event((Pringle::Hooks::camera_fx_settings&)cameraFxSettings);
 		Pringle::Hook::CallPremade<Pringle::Hooks::CameraEffectEvent>(event);
-		if (!event.canceled) 
+		if (!event.Canceled) 
 		{
 			if (cameraFxSettings.Enabled)
 			{
@@ -3453,7 +3453,7 @@ namespace
 			// Pringle
 			Pringle::Hooks::FogEffectEvent event((Pringle::Hooks::sky_properties_data&)props);
 			Pringle::Hook::CallPremade<Pringle::Hooks::FogEffectEvent>(event);
-			if (!event.canceled)
+			if (!event.Canceled)
 			{
 				sub_671D90(bspIndex, &props, state, 1.0f);
 			}

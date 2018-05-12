@@ -16,5 +16,5 @@ NoRenderMod::NoRenderMod() : ModuleBase("Pringle")
 void NoRenderMod::OnRenderEffect(const Pringle::Hooks::RenderEffectEvent& event)
 {
 	if (this->Enabled->ValueInt)
-		event.canceled = true;
+		event.Canceled = true;
 }
