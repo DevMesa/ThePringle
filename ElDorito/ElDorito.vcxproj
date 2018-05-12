@@ -147,7 +147,9 @@
       <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">All</AssemblerOutput>
     </ClCompile>
     <ClCompile Include="Source\ThePringle\EulerAngle.cpp" />
+    <ClCompile Include="Source\ThePringle\Markers.cpp" />
     <ClCompile Include="Source\ThePringle\NoclipHack.cpp" />
+    <ClCompile Include="Source\ThePringle\NoRender.cpp" />
     <ClCompile Include="Source\ThePringle\PringleCore.cpp" />
     <ClCompile Include="Source\ThePringle\QAngle.cpp" />
     <ClCompile Include="Source\ThePringle\Quaternion.cpp" />
@@ -361,6 +363,7 @@
     <ClInclude Include="Source\ThePringle\HookEvents.hpp" />
     <ClInclude Include="Source\ThePringle\Hooks.hpp" />
     <ClInclude Include="Source\ThePringle\NoclipHack.hpp" />
+    <ClInclude Include="Source\ThePringle\NoRender.hpp" />
     <ClInclude Include="Source\ThePringle\PringleCore.hpp" />
     <ClInclude Include="Source\ThePringle\Properties.hpp" />
     <ClInclude Include="Source\ThePringle\QAngle.hpp" />
