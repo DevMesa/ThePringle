@@ -8,7 +8,7 @@ using namespace Modules;
 
 NoRenderMod::NoRenderMod() : ModuleBase("Pringle")
 {
-	this->Enabled = this->AddVariableInt("NoRender.Enabled", "NoRender.Enabled", "Disable screen rendering effects", eCommandFlagsArchived, 0);
+	this->Enabled = this->AddVariableInt("NoRender.Enabled", "norender.enabled", "Disable screen rendering effects", eCommandFlagsArchived, 0);
 
 	Hook::SubscribeMember<RenderEffectEvent>(this, &NoRenderMod::OnRenderEffect);
 }
