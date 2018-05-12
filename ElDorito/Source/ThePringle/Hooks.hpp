@@ -2,7 +2,7 @@
 #ifndef PRINGLE_HOOKS
 #define PRINGLE_HOOKS
 
-#include <vector>
+#include <type_traits>
 #include <functional>
 #include <vector>
 #include <algorithm>
@@ -84,9 +84,34 @@ namespace Pringle
 		template<typename T, typename... Args>
 		static void Call(Args&&... args)
 		{
+			// could use overloading to achieve this, but that clutters
+			// intellisense and makes it look like you can do it, well,
+			// until you try and compile it
+			if constexpr (sizeof...(Args) == 1)
+			{
+				static constexpr bool same_type = std::is_same_v< T, std::tuple_element_t<0, std::tuple<Args...>> >;
+				static_assert(!same_type, "Attempting to use Hook::Call<T>(...) with an instantiated event. Use Call<T>(...) where ... is your constructor parameter list or use Hook::CallPremade<T>(const T&)");
+			}
+
 			CallPremade<T>(T(args...));
 		}
 
+	private:
+		// for `using BaseType = T;` or `typedef T BaseType`
+		template<typename T>
+		struct HasBaseTypeTrait
+		{
+		private:
+			template<typename U> static std::true_type _(typename U::BaseType*);
+			template<typename U> static std::false_type _(...);
+		public:
+			static constexpr bool Value = decltype(_<T>(0))::value;
+		};
+
+		template<typename T>
+		static constexpr bool HasBaseType = HasBaseTypeTrait<T>::Value;
+
+	public:
 		// for if you want a hook result
 		template<typename T>
 		static void CallPremade(const T& hook)
@@ -96,6 +121,16 @@ namespace Pringle
 			for (auto&& sub : info.Subscribed)
 				if(sub.Enabled)
 					sub.Function(hook);
+
+			if constexpr (HasBaseType<T>)
+			{
+				static_assert(std::is_base_of_v<T::BaseType, T>, "T is not derived from T::BaseType");
+				static_assert(!std::is_same_v<T, T::BaseType>, "T::BaseType can't be the same as T");
+
+				// if is to prevent error spam if one of the above assertions fail
+				if constexpr(std::is_base_of_v<T::BaseType, T> && !std::is_same_v<T, T::BaseType>)
+					CallPremade<T::BaseType>(hook);
+			}
 		}
 
 		template<typename T>

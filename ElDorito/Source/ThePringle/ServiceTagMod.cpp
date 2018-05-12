@@ -38,7 +38,7 @@ ServiceTagMod::ServiceTagMod() : ModuleBase("Pringle")
 }
 
 
-int ticks = 0, state = 0;
+size_t ticks = 0, state = 0;
 
 std::string GetCurrentTag()
 {

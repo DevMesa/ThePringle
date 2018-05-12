@@ -154,7 +154,7 @@ void Pringle::Aimbot::ScoreVisible(const AimbotEvents::ScoreTarget& msg)
 
 	msg.Importance *=
 		AimbotEvents::ScoreTarget::Calculate(
-			visible ? 1 : 0,
+			visible ? 1.0f : 0.0f,
 			this->VisibleImportance->ValueFloat);
 }
 
