@@ -9,6 +9,8 @@
 #include "Vector.hpp"
 #include "QAngle.hpp"
 
+#include "../CommandMap.hpp"
+
 namespace Pringle
 {
 	namespace Hooks
@@ -50,6 +52,16 @@ namespace Pringle
 		
 		struct PreLocalPlayerInput { };
 		struct PostLocalPlayerInput { };
+
+		struct CvarUpdate
+		{
+			mutable bool SilenceMessage;
+			Modules::Command& Command;
+			CvarUpdate(Modules::Command& command) :
+				SilenceMessage(true), // default this shit to true
+				Command(command) 
+			{}
+		};
 
 		namespace AimbotEvents
 		{

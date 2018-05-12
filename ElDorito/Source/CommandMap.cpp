@@ -1,3 +1,5 @@
+#include "ThePringle/Hooks.hpp"
+
 #include "CommandMap.hpp"
 #include <algorithm>
 #include <sstream>
@@ -203,9 +205,13 @@ namespace Modules
 			return false;
 		}
 
+		Pringle::Hooks::CvarUpdate evnt(*cmd);
+		Pringle::Hook::CallPremade(evnt);
+
 		if (!cmd->UpdateEvent)
 		{
-			*output = previousValue + " -> " + cmd->ValueString; // no update event, so we'll just return with what we set the value to
+			if (!evnt.SilenceMessage)
+				*output = previousValue + " -> " + cmd->ValueString; // no update event, so we'll just return with what we set the value to
 			return true;
 		}
 
@@ -214,8 +220,9 @@ namespace Modules
 		if (!ret) // error, revert the variable
 			this->SetVariable(cmd, previousValue, std::string());
 
-		if (output->length() <= 0)
-			*output = previousValue + " -> " + cmd->ValueString;
+		if (!evnt.SilenceMessage)
+			if (output->length() <= 0)
+				*output = previousValue + " -> " + cmd->ValueString;
 
 		return ret;
 	}
