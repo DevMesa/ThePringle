@@ -53,16 +53,6 @@ namespace Pringle
 		return this->device;
 	}
 
-	ID3DXFont* Draw::GetFont() const
-	{
-		return !this->font ? FontManager::Instance().GetFont(device) : this->font;
-	}
-
-	void Draw::SetFont(ID3DXFont* font)
-	{
-		this->font = font;
-	}
-
 	int Draw::GetScreenWidth()
 	{
 		return this->screenWidth;
@@ -177,7 +167,7 @@ namespace Pringle
 		RECT rect;
 		SetRect(&rect, x, y, x, y);
 
-		GetFont()->DrawTextA(0, text, -1, &rect, DT_NOCLIP | alignment, color);
+		FontManager::Instance().GetFont()->DrawTextA(0, text, -1, &rect, DT_NOCLIP | alignment, color);
 	}
 
 	void Draw::Text(const wchar_t* text, int x, int y, uint32_t color, uint32_t alignment)
@@ -185,7 +175,7 @@ namespace Pringle
 		RECT rect;
 		SetRect(&rect, x, y, x, y);
 
-		GetFont()->DrawTextW(0, text, -1, &rect, DT_NOCLIP | alignment, color);
+		FontManager::Instance().GetFont()->DrawTextW(0, text, -1, &rect, DT_NOCLIP | alignment, color); // TODO: this may crash
 	}
 
 	bool Draw::ToScreen(float x, float y, float z, int & screenX, int & screenY, float clamp)

@@ -15,14 +15,17 @@ namespace Pringle
 	{
 	public:
 		FontManager();
+		~FontManager();
 
-		ID3DXFont* GetFont(LPDIRECT3DDEVICE9 device);
-
+		ID3DXFont* GetFont();
+		void SetFont(ID3DXFont* font);
+		
+		void OnInitialize(const DirectX::Initialize& msg);
 		void OnPreReset(const DirectX::PreReset& msg);
 		void OnPostReset(const DirectX::PostReset& msg);
 
 	private:
-		ID3DXFont* font;
+		ID3DXFont *font, *default_font;
 	};
 };
 

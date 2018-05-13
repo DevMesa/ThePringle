@@ -27,18 +27,15 @@ namespace Pringle
 	class Draw
 	{
 		LPDIRECT3DDEVICE9 device;
-		ID3DXFont* font;
-		int screenWidth, screenHeight;
 		LPDIRECT3DSTATEBLOCK9 state;
+		int screenWidth;
+		int screenHeight;
 
 	public:
 		Draw(LPDIRECT3DDEVICE9 device);
 		~Draw();
 
 		LPDIRECT3DDEVICE9 GetDevice() const;
-
-		ID3DXFont* GetFont() const;
-		void SetFont(ID3DXFont* font);
 
 		int GetScreenWidth();
 		int GetScreenHeight();
