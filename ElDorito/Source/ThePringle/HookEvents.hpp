@@ -24,6 +24,13 @@ namespace Pringle
 
 		namespace DirectX
 		{
+			struct Initialize
+			{
+				LPDIRECT3DDEVICE9 Device;
+
+				Initialize(LPDIRECT3DDEVICE9 device) : Device(device) { };
+			};
+
 			struct EndScene
 			{
 				LPDIRECT3DDEVICE9 Device;
