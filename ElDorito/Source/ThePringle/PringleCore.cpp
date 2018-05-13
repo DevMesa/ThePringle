@@ -2,6 +2,7 @@
 #include "SpeedHack.hpp"
 #include "ESP.hpp"
 #include "Aimbot.hpp"
+#include "Projectiles.hpp"
 #include "ServiceTagMod.hpp"
 #include "NoclipHack.hpp"
 #include "NoRender.hpp"
@@ -46,6 +47,7 @@ namespace Pringle
 
 		SpeedHack::Instance();
 		Aimbot::Instance();
+		Projectiles::Instance();
 		ESP::Instance();
 		ServiceTagMod::Instance();
 		NoclipHack::Instance();

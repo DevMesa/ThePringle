@@ -151,6 +151,7 @@
     <ClCompile Include="Source\ThePringle\NoclipHack.cpp" />
     <ClCompile Include="Source\ThePringle\NoRender.cpp" />
     <ClCompile Include="Source\ThePringle\PringleCore.cpp" />
+    <ClCompile Include="Source\ThePringle\Projectiles.cpp" />
     <ClCompile Include="Source\ThePringle\QAngle.cpp" />
     <ClCompile Include="Source\ThePringle\Quaternion.cpp" />
     <ClCompile Include="Source\ThePringle\ServiceTagMod.cpp" />
@@ -365,6 +366,7 @@
     <ClInclude Include="Source\ThePringle\NoclipHack.hpp" />
     <ClInclude Include="Source\ThePringle\NoRender.hpp" />
     <ClInclude Include="Source\ThePringle\PringleCore.hpp" />
+    <ClInclude Include="Source\ThePringle\Projectiles.hpp" />
     <ClInclude Include="Source\ThePringle\Properties.hpp" />
     <ClInclude Include="Source\ThePringle\QAngle.hpp" />
     <ClInclude Include="Source\ThePringle\Quaternion.hpp" />

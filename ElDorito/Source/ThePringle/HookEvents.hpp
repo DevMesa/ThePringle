@@ -106,7 +106,7 @@ namespace Pringle
 				};
 
 				// make a copy of this as it's mutable
-				Vector Position;
+				mutable Vector Position;
 				const Info& Information;
 
 				Target(const Vector& pos, const Info& info) :
