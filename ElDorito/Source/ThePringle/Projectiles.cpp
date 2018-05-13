@@ -1,19 +1,20 @@
 #include "Projectiles.hpp"
 
-#include "../Modules/ModulePlayer.hpp"
-#include "../Patches/PlayerRepresentation.hpp"
 #include <sstream>
 #include <algorithm> 
 
-#include "../Blam/Tags/Game/Globals.hpp"
-#include "../Blam/Tags/Items/DefinitionWeapon.hpp"
+#include "../Patches/PlayerRepresentation.hpp"
 #include "../Patches/Forge.hpp"
 #include "../Patches/Weapon.hpp"
 #include "../Modules/ModuleForge.hpp"
+#include "../Modules/ModulePlayer.hpp"
+#include "../Blam/BlamTime.hpp"
 #include "../Blam/BlamObjects.hpp"
 #include "../Blam/BlamPlayers.hpp"
 #include "../Blam/Tags/Tags.hpp"
 #include "../Blam/Tags/Objects/Projectile.hpp"
+#include "../Blam/Tags/Game/Globals.hpp"
+#include "../Blam/Tags/Items/DefinitionWeapon.hpp"
 
 using namespace Pringle::Hooks;
 using namespace Modules;
@@ -26,12 +27,70 @@ namespace Pringle
 	Projectiles::Projectiles()
 		: ModuleBase("Pringle")
 	{
-		this->Enabled = this->AddVariableInt("Projectiles.Enabled", "projectiles.enabled", "Enable projectile support", eCommandFlagsNone /*TODO: make archive once working*/, 0);
+		this->Enabled = this->AddVariableInt("Projectiles.Enabled", "projectiles.enabled", "Enable projectile support", eCommandFlagsArchived, 1);
+		this->MaxTimeToImpact = this->AddVariableFloat("Projectiles.Max.TimeToImpact", "projectiles.max.timetoimpact", "Maximum time to impact in seconds", eCommandFlagsArchived, 1.0);
+		this->MaxAcceleration = this->AddVariableFloat("Projectiles.Max.Jerk", "projectiles.max.jerk", "Maximum jerk", eCommandFlagsArchived, 0.5);
 
 		// make the hook first so we can divert the OnTarget
+		Hook::SubscribeMember<Tick>(this, &Projectiles::TrackDerivatives, HookPriority::First);
 		Hook::SubscribeMember<AimbotEvents::ScoreTarget>(this, &Projectiles::FirstOnScoreTarget, HookPriority::First);
 
 		TTI = this->CreateSimpleTimeToImpactCalculator(50.0f);
+	}
+
+	std::unordered_map<uint32_t, ProjectileDerivativeCalculator*> DerivativeCalculators;
+	ProjectileDerivativeCalculator* Projectiles::GetPositionDerivatives(uint32_t id)
+	{
+		auto it = DerivativeCalculators.find(id);
+		if (it == DerivativeCalculators.end())
+			return nullptr;
+		return it->second;
+	}
+
+	void Projectiles::TrackDerivatives(const Tick& e)
+	{
+		if (!this->Enabled->ValueInt)
+			return;
+
+		float time = Blam::Time::GetSecondsPerTick();
+		uint32_t ticks = Blam::Time::GetGameTicks();
+		
+		if (ticks == this->LastTicks)
+			return;
+		this->LastTicks = ticks;
+
+		auto new_player_pos = [&](uint32_t index, const Vector& position)
+		{
+			auto it = DerivativeCalculators.find(index);
+
+			if (it == DerivativeCalculators.end())
+			{
+				ProjectileDerivativeCalculator* ptr = DerivativeCalculators[index] = new ProjectileDerivativeCalculator();
+				ptr->Derivatives[0] = position;
+			}
+			else
+				it->second->Update(position, time);
+		};
+
+		// standard player iterate
+
+		auto& players = Blam::Players::GetPlayers();
+		auto& localplayerhandle = Blam::Players::GetLocalPlayer(0);
+
+		for (auto it = players.begin(); it != players.end(); ++it)
+		{
+			const auto& unitObjectIndex = it->SlaveUnit.Handle;
+
+			if (unitObjectIndex == -1)
+				continue;
+
+			auto unit = Blam::Objects::Get(unitObjectIndex);
+
+			if (!unit)
+				continue;
+
+			new_player_pos(unitObjectIndex, unit->Position);
+		}
 	}
 
 	struct WeaponInfoEx : public WeaponInfo
@@ -92,8 +151,16 @@ namespace Pringle
 		
 		// update the position of the target so we aim at that instead
 		const Vector& pos = e.What.Position;
-		const Vector& vel = e.What.Information.Velocity;
-		const Vector acel = Vector::Down() * GameGlobals::Physics::DefaultGravity;
+		Vector vel = e.What.Information.Velocity;
+		Vector acel = Vector::Zero();
+
+		auto dc = GetPositionDerivatives(e.What.Information.UnitIndex);
+		if (dc)
+		{
+			vel = dc->Velocity();
+			acel = dc->Acceleration();
+			//auto jerk = dc->Jerk();
+		}
 
 		float last_err = 1000.0f; // 1k seconds, should be high enough...
 		float time = this->TimeToImpact(e.Self.Position, e.What.Position, TTI);
@@ -123,8 +190,11 @@ namespace Pringle
 		e.What.Position = this->EstimatePosition(pos, vel, acel, time);
 
 		// don't try to aim past the max range
-		if ((e.What.Position - e.Self.Position).Length() > defproj->MaximumRange)
+		if (time > this->MaxTimeToImpact->ValueFloat ||
+			(e.What.Position - e.Self.Position).Length() > defproj->MaximumRange)
+		{
 			e.Importance *= 0;
+		}
 	}
 
 	TimeToImpactCalculator Projectiles::CreateSimpleTimeToImpactCalculator(float projectile_speed)
