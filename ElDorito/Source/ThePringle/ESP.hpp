@@ -15,6 +15,15 @@
 
 namespace Pringle
 {
+	struct PlayerData
+	{
+		Blam::Players::PlayerDatum& Player;
+		Blam::Objects::ObjectBase* Data;
+		bool Visible;
+
+		PlayerData(Blam::Players::PlayerDatum& player, Blam::Objects::ObjectBase* data, bool visible) : Player(player), Data(data), Visible(visible) { }
+	};
+
 	class ESP :
 		public Utils::Singleton<ESP>,
 		public Modules::ModuleBase
@@ -36,9 +45,7 @@ namespace Pringle
 
 	private:
 		std::mutex unit_mutex;
-		std::vector<Blam::Objects::ObjectBase*> ally_player_units;
-		std::vector<Blam::Objects::ObjectBase*> enemy_player_units;
-		std::vector<Blam::Objects::ObjectBase*> hit_enemy_player_units;
+		std::vector<PlayerData> players;
 
 		typedef struct {
 			Blam::Math::RealVector3D start;

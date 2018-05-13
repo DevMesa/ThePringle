@@ -27,6 +27,38 @@ namespace Pringle
 		this->font = font;
 	}
 
+	void FontManager::GetTextDimensions(const char* text, int& width, int& height)
+	{
+		auto current = this->GetFont();
+
+		if (!current)
+			return;
+
+		RECT rect;
+		SetRect(&rect, 0, 0, 0, 0);
+
+		current->DrawTextA(nullptr, text, -1, &rect, DT_CALCRECT, COLOR4I(0, 0, 0, 0));
+
+		width = rect.right - rect.left;
+		height = rect.bottom - rect.top;
+	}
+
+	void FontManager::GetTextDimensions(const wchar_t * text, int & width, int & height)
+	{
+		auto current = this->GetFont();
+
+		if (!current)
+			return;
+
+		RECT rect;
+		SetRect(&rect, 0, 0, 0, 0);
+
+		current->DrawTextW(nullptr, text, -1, &rect, DT_CALCRECT, COLOR4I(0, 0, 0, 0));
+
+		width = rect.right - rect.left;
+		height = rect.bottom - rect.top;
+	}
+
 	void FontManager::OnInitialize(const DirectX::Initialize & msg)
 	{
 		if (this->default_font)
@@ -35,7 +67,7 @@ namespace Pringle
 			this->default_font = nullptr;
 		}
 
-		D3DXCreateFont(msg.Device, 16, 8, 0, 0, false, DEFAULT_CHARSET, OUT_CHARACTER_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, "Verdana", &this->default_font);
+		D3DXCreateFont(msg.Device, 16, 8, 0, 0, false, DEFAULT_CHARSET, OUT_CHARACTER_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH, "Verdana", &this->default_font);
 	}
 
 	void FontManager::OnPreReset(const Hooks::DirectX::PreReset& msg)

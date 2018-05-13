@@ -19,6 +19,9 @@ namespace Pringle
 
 		ID3DXFont* GetFont();
 		void SetFont(ID3DXFont* font);
+
+		void GetTextDimensions(const char* text, int& width, int& height);
+		void GetTextDimensions(const wchar_t* text, int& width, int& height);
 		
 		void OnInitialize(const DirectX::Initialize& msg);
 		void OnPreReset(const DirectX::PreReset& msg);
