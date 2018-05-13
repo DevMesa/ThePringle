@@ -594,6 +594,12 @@
       <Filter>ThePringle</Filter>
     </ClCompile>
     <ClCompile Include="Source\ThePringle\FontManager.cpp">
+	  <Filter>ThePringle</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ThePringle\NoRender.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ThePringle\Markers.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1353,6 +1359,9 @@
       <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\FontManager.hpp">
+	  <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\NoRender.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
   </ItemGroup>

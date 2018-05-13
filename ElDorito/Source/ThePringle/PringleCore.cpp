@@ -5,6 +5,7 @@
 #include "ServiceTagMod.hpp"
 #include "NoclipHack.hpp"
 #include "FontManager.hpp"
+#include "NoRender.hpp"
 
 #include "../Console.hpp"
 #include "../Patch.hpp"
@@ -50,5 +51,6 @@ namespace Pringle
 		ESP::Instance();
 		ServiceTagMod::Instance();
 		NoclipHack::Instance();
+		NoRenderMod::Instance();
 	}
 }

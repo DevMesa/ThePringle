@@ -10,6 +10,8 @@
 #include "QAngle.hpp"
 
 #include "Draw.hpp"
+#include "../CommandMap.hpp"
+#include "Blam/Tags/Camera/AreaScreenEffect.hpp"
 
 namespace Pringle
 {
@@ -51,9 +53,19 @@ namespace Pringle
 			float& Gravity;
 			ModifyGravityMultiplier(float& gravity) : Gravity(gravity) { }
 		};
-		
+
 		struct PreLocalPlayerInput { };
 		struct PostLocalPlayerInput { };
+
+		struct CvarUpdate
+		{
+			mutable bool SilenceMessage;
+			Modules::Command& Command;
+			CvarUpdate(Modules::Command& command) :
+				SilenceMessage(true), // default this shit to true
+				Command(command) 
+			{}
+		};
 
 		namespace AimbotEvents
 		{
@@ -144,6 +156,86 @@ namespace Pringle
 			bool& Visibility;
 			ModifyMarkerVisibility(bool& visibility) : Visibility(visibility) { }
 		};
+
+		// TODO: use forward declerations here
+		struct sky_properties_data // copy/pasted from Forge.cpp line 3345
+		{
+			uint16_t Flags;
+			uint16_t Unknown;
+			uint32_t Name;
+			float LightSourceY;
+			float LightSourceX;
+			Blam::Math::RealColorRGB FogColor;
+			float Brightness;
+			float FogGradientThreshold;
+			float LightIntensity;
+			float SkyinvisiblilityThroughFog;
+			float Unknown2C;
+			float Unknown30;
+			float LightSourceSpread;
+			float Unknown38;
+			float FogIntensity;
+			float Unknown40;
+			float TintCyan;
+			float TintMagenta;
+			float TintYellow;
+			float FogIntensityCyan;
+			float FogIntensityMagenta;
+			float FogIntensityYellow;
+			float BackgroundColorRed;
+			float BackgroundColorGreen;
+			float BackgroundColorBlue;
+			float TintRed;
+			float TintGreen;
+			float TintBlue;
+			float FogIntensity2;
+			float StartDistance;
+			float EndDistance;
+			float FogVelocityX;
+			float FogVelocityY;
+			float FogVelocityZ;
+			Blam::Tags::TagReference Weather;
+			float Unknown9C;
+			uint32_t UnknownA0;
+		};
+		static_assert(sizeof(sky_properties_data) == 0xA4, "");
+		struct camera_fx_settings {
+			bool Enabled;
+			float Exposure;
+			float LightIntensity;
+			float BloomIntensity;
+			float LightBloomIntensity;
+		};
+
+		struct RenderEffectEvent
+		{
+			mutable bool Canceled = false; // set to true to disable effect
+		};
+		struct FogEffectEvent :
+			public RenderEffectEvent
+		{
+			using BaseType = RenderEffectEvent;
+			sky_properties_data& Data;
+
+			FogEffectEvent(sky_properties_data& data) : Data(data) {}
+		};
+		struct ScreenEffectEvent :
+			public RenderEffectEvent
+		{
+			using BaseType = RenderEffectEvent;
+			Blam::Tags::Camera::AreaScreenEffect::ScreenEffect& Data;
+
+			ScreenEffectEvent(Blam::Tags::Camera::AreaScreenEffect::ScreenEffect& data) : Data(data) {}
+		};
+		struct CameraEffectEvent :
+			public RenderEffectEvent
+		{
+			using BaseType = RenderEffectEvent;
+			camera_fx_settings& Data;
+
+			CameraEffectEvent(camera_fx_settings& data) : Data(data) {}
+		};
+
 	}
 }
 
