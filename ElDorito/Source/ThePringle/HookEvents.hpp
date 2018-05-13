@@ -34,9 +34,9 @@ namespace Pringle
 			struct EndScene
 			{
 				LPDIRECT3DDEVICE9 Device;
-				Pringle::Draw& Draw;
+				std::unique_ptr<Pringle::Draw> Draw;
 
-				EndScene(LPDIRECT3DDEVICE9 device) : Device(device), Draw(Pringle::Draw(device)) { }
+				EndScene(LPDIRECT3DDEVICE9 device) : Device(device), Draw(std::make_unique<Pringle::Draw>(device)) { }
 			};
 			struct PreReset {};
 			struct PostReset {};

@@ -60,27 +60,6 @@ namespace
 
 		return unit;
 	}
-
-	static void GetOBB(uint32_t index, Objects::ObjectBase* data, Pringle::Vector& mins, Pringle::Vector& maxs)
-	{
-		auto bb = Forge::GetObjectBoundingBox(data->TagIndex);
-		if (!bb)
-			return;
-
-		Math::RealMatrix4x3 objectTransform;
-		GetObjectTransformationMatrix(index, &objectTransform);
-		const auto objectRotation = Math::RealQuaternion::CreateFromRotationMatrix(objectTransform);
-
-		Vector pos = data->Position;// Math::RealVector3D::Transform(data->Center, objectRotation);
-
-		mins.X = pos.X + bb->MinX;
-		mins.Y = pos.Y + bb->MinY;
-		mins.Z = pos.Z + bb->MinZ;
-
-		maxs.X = pos.X + bb->MaxX;
-		maxs.Y = pos.Y + bb->MaxY;
-		maxs.Z = pos.Z + bb->MaxZ;
-	}
 }
 
 namespace Pringle
@@ -101,21 +80,26 @@ namespace Pringle
 
 	void ESP::Draw(const DirectX::EndScene& msg, uint32_t index, Blam::Objects::ObjectBase* unit, uint32_t color)
 	{
-		Vector mins, maxs;
-		GetOBB(index, unit, mins, maxs);
+		auto bb = Forge::GetObjectBoundingBox(unit->TagIndex);
+		if (!bb)
+			return;
+
+		Vector pbot = unit->Position;
+		Vector ptop = pbot;
+		ptop.Z += bb->MaxZ;
 
 		int topX, topY;
-		if (!msg.Draw.ToScreen(maxs.X, maxs.Y, maxs.Z, topX, topY))
+		if (!msg.Draw->ToScreen(ptop.X, ptop.Y, ptop.Z, topX, topY))
 			return;
 
 		int botX, botY;
-		if (!msg.Draw.ToScreen(mins.X, mins.Y, mins.Z, botX, botY))
+		if (!msg.Draw->ToScreen(pbot.X, pbot.Y, pbot.Z, botX, botY))
 			return;
 
 		int height = (botY - topY);
 		int width = height;
 
-		msg.Draw.OutlinedRect(topX, topY, width, height, color);
+		msg.Draw->OutlinedRect(topX - (width / 2), topY, width, height, color);
 	}
 
 	void ESP::Draw(const DirectX::EndScene& msg, Blam::Math::RealVector3D _pos, uint32_t color)
@@ -202,12 +186,12 @@ namespace Pringle
 
 		//std::lock_guard<std::mutex> lock(this->unit_mutex);
 
-		msg.Draw.CaptureState();
+		msg.Draw->CaptureState();
 
 		//this->DrawPlayers(msg);
 		this->DrawObjects(msg);
 
-		msg.Draw.ReleaseState();
+		msg.Draw->ReleaseState();
 	}
 
 	void ESP::UpdatePlayers(const Hooks::PreTick& msg)
