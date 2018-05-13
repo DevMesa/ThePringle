@@ -57,7 +57,7 @@ namespace Pringle
 
 		const T& Jerk()
 		{
-			static_assert(ToDerivative >= 4, "Velocity is the 3rd derivative, have less");
+			static_assert(ToDerivative >= 4, "Jerk is the 3rd derivative, have less");
 			return Averaged[3];
 		}
 
