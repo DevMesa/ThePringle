@@ -153,7 +153,7 @@ namespace Pringle
 		template<typename T, typename What>
 		static Handle<T> SubscribeMember(What* self, void (What::*member_func)(const T&), float priority = HookPriority::Default)
 		{
-			return Subscribe<T>(std::bind(member_func, self, std::placeholders::_1));
+			return Subscribe<T>(std::bind(member_func, self, std::placeholders::_1), priority);
 		}
 
 		template<typename T>
