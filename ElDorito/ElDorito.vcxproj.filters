@@ -594,7 +594,7 @@
       <Filter>ThePringle</Filter>
     </ClCompile>
     <ClCompile Include="Source\ThePringle\FontManager.cpp">
-	  <Filter>ThePringle</Filter>
+      <Filter>ThePringle</Filter>
     </ClCompile>
     <ClCompile Include="Source\ThePringle\NoRender.cpp">
       <Filter>ThePringle</Filter>
@@ -603,6 +603,12 @@
       <Filter>ThePringle</Filter>
     </ClCompile>
     <ClCompile Include="Source\ThePringle\Projectiles.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ThePringle\Chams.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ThePringle\CustomHooks.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1351,10 +1357,10 @@
       <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\HookEvents.hpp">
-	  <Filter>ThePringle</Filter>
+      <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\Quaternion.hpp">
-	  <Filter>ThePringle</Filter>
+      <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\Halo\Halo.hpp">
       <Filter>ThePringle\Halo</Filter>
@@ -1366,12 +1372,18 @@
       <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\FontManager.hpp">
-	  <Filter>ThePringle</Filter>
+      <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\NoRender.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\Projectiles.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\Chams.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\CustomHooks.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
   </ItemGroup>
