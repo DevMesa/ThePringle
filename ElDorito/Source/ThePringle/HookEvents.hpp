@@ -9,9 +9,9 @@
 #include "Vector.hpp"
 #include "QAngle.hpp"
 
+#include "Draw.hpp"
 #include "../CommandMap.hpp"
 #include "Blam/Tags/Camera/AreaScreenEffect.hpp"
-
 
 namespace Pringle
 {
@@ -24,10 +24,19 @@ namespace Pringle
 
 		namespace DirectX
 		{
+			struct Initialize
+			{
+				LPDIRECT3DDEVICE9 Device;
+
+				Initialize(LPDIRECT3DDEVICE9 device) : Device(device) { };
+			};
+
 			struct EndScene
 			{
 				LPDIRECT3DDEVICE9 Device;
-				EndScene(LPDIRECT3DDEVICE9 device) : Device(device) {}
+				std::unique_ptr<Pringle::Draw> Draw;
+
+				EndScene(LPDIRECT3DDEVICE9 device) : Device(device), Draw(std::make_unique<Pringle::Draw>(device)) { }
 			};
 			struct PreReset {};
 			struct PostReset {};

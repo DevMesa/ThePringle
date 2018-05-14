@@ -590,6 +590,12 @@
     <ClCompile Include="Source\ThePringle\Util.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ThePringle\Draw.cpp">
+      <Filter>ThePringle</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ThePringle\FontManager.cpp">
+	  <Filter>ThePringle</Filter>
+    </ClCompile>
     <ClCompile Include="Source\ThePringle\NoRender.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
@@ -1341,13 +1347,23 @@
     <ClInclude Include="Source\ThePringle\NoclipHack.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ThePringle\HookEvents.hpp" />
-    <ClInclude Include="Source\ThePringle\Quaternion.hpp" />
+    <ClInclude Include="Source\ThePringle\HookEvents.hpp">
+	  <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\Quaternion.hpp">
+	  <Filter>ThePringle</Filter>
+    </ClInclude>
     <ClInclude Include="Source\ThePringle\Halo\Halo.hpp">
       <Filter>ThePringle\Halo</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\Util.hpp">
       <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\Draw.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ThePringle\FontManager.hpp">
+	  <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\NoRender.hpp">
       <Filter>ThePringle</Filter>

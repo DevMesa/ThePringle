@@ -4,6 +4,7 @@
 #include "Aimbot.hpp"
 #include "ServiceTagMod.hpp"
 #include "NoclipHack.hpp"
+#include "FontManager.hpp"
 #include "NoRender.hpp"
 
 #include "../Console.hpp"
@@ -46,6 +47,7 @@ namespace Pringle
 
 		SpeedHack::Instance();
 		Aimbot::Instance();
+		FontManager::Instance();
 		ESP::Instance();
 		ServiceTagMod::Instance();
 		NoclipHack::Instance();

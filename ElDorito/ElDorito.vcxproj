@@ -143,10 +143,12 @@
     <ClCompile Include="Source\Server\VotingPackets.cpp" />
     <ClCompile Include="Source\Server\VotingSystem.cpp" />
     <ClCompile Include="Source\ThePringle\Aimbot.cpp" />
+    <ClCompile Include="Source\ThePringle\Draw.cpp" />
     <ClCompile Include="Source\ThePringle\ESP.cpp">
       <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">All</AssemblerOutput>
     </ClCompile>
     <ClCompile Include="Source\ThePringle\EulerAngle.cpp" />
+    <ClCompile Include="Source\ThePringle\FontManager.cpp" />
     <ClCompile Include="Source\ThePringle\Markers.cpp" />
     <ClCompile Include="Source\ThePringle\NoclipHack.cpp" />
     <ClCompile Include="Source\ThePringle\NoRender.cpp" />
@@ -356,9 +358,11 @@
     <ClInclude Include="Source\Server\VotingPackets.hpp" />
     <ClInclude Include="Source\Server\VotingSystem.hpp" />
     <ClInclude Include="Source\Settings.hpp" />
+    <ClInclude Include="Source\ThePringle\Draw.hpp" />
     <ClInclude Include="Source\ThePringle\ESP.hpp" />
     <ClInclude Include="Source\ThePringle\Aimbot.hpp" />
     <ClInclude Include="Source\ThePringle\EulerAngle.hpp" />
+    <ClInclude Include="Source\ThePringle\FontManager.hpp" />
     <ClInclude Include="Source\ThePringle\Halo\Halo.hpp" />
     <ClInclude Include="Source\ThePringle\HookEvents.hpp" />
     <ClInclude Include="Source\ThePringle\Hooks.hpp" />
