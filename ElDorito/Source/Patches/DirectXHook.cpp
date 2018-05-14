@@ -60,6 +60,8 @@ namespace
 			return false;
 		}
 
+		Pringle::Hook::Call<Pringle::Hooks::DirectX::Initialize>(device);
+
 		auto webRenderer = WebRenderer::GetInstance();
 		auto webDebugging = ElDorito::Instance().IsWebDebuggingEnabled();
 		return webRenderer->InitRenderer(device) && webRenderer->Init("dew://ui/", webDebugging);

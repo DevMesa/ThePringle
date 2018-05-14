@@ -15,6 +15,17 @@
 
 namespace Pringle
 {
+	struct PlayerData
+	{
+		Blam::Players::PlayerDatum& Player;
+		Blam::Objects::ObjectBase* Data;
+		bool Visible;
+		Vector Mins;
+		Vector Maxs;
+
+		PlayerData(Blam::Players::PlayerDatum& player, Blam::Objects::ObjectBase* data, bool visible, Vector mins, Vector maxs) : Player(player), Data(data), Visible(visible), Mins(mins), Maxs(maxs) { }
+	};
+
 	class ESP :
 		public Utils::Singleton<ESP>,
 		public Modules::ModuleBase
@@ -23,11 +34,9 @@ namespace Pringle
 		ESP();
 
 		Modules::Command* Enabled;
-		Modules::Command* Flag1;
-		Modules::Command* Flag2;
 
 	protected:
-		void Draw(const Hooks::DirectX::EndScene & msg, Blam::Objects::ObjectBase* unit, uint32_t color);
+		void Draw(const Hooks::DirectX::EndScene & msg, uint32_t index, Blam::Objects::ObjectBase* unit, uint32_t color);
 		void Draw(const Hooks::DirectX::EndScene & msg, Blam::Math::RealVector3D _pos, uint32_t color);
 		void DrawPlayers(const Hooks::DirectX::EndScene & msg);
 		void DrawObjects(const Hooks::DirectX::EndScene & msg);
@@ -38,9 +47,7 @@ namespace Pringle
 
 	private:
 		std::mutex unit_mutex;
-		std::vector<Blam::Objects::ObjectBase*> ally_player_units;
-		std::vector<Blam::Objects::ObjectBase*> enemy_player_units;
-		std::vector<Blam::Objects::ObjectBase*> hit_enemy_player_units;
+		std::vector<PlayerData> players;
 
 		typedef struct {
 			Blam::Math::RealVector3D start;

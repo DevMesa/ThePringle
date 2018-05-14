@@ -1,4 +1,5 @@
 #include "ESP.hpp"
+#include "Draw.hpp"
 #include "Halo/Halo.hpp"
 #include "../ElDorito.hpp"
 #include "../Pointer.hpp"
@@ -10,6 +11,11 @@
 #include "../Forge/ForgeUtil.hpp"
 #include "../Console.hpp"
 #include "../Modules/ModuleSettings.hpp"
+#include "../Forge/ForgeUtil.hpp"
+#include "../Blam/Math/RealMatrix4x3.hpp"
+#include "../Blam/Math/RealQuaternion.hpp"
+#include "FontManager.hpp"
+#include "../Patches/Weapon.hpp"
 
 #include "Vector.hpp"
 #include "QAngle.hpp"
@@ -25,217 +31,12 @@ using namespace Pringle;
 using namespace Pringle::Hooks;
 using namespace Modules;
 using namespace Blam;
+using namespace Patches;
 
-namespace Halo
+namespace
 {
-	class rect_t
-	{
-	public:
-		uint16_t draw_start_x; //0x0000
-		uint16_t draw_start_y; //0x0002
-		uint16_t draw_end_x; //0x0004
-		uint16_t draw_end_y; //0x0006
-	}; //Size: 0x0008
-
-	class color_t
-	{
-	public:
-		float r; //0x0000
-		float g; //0x0004
-		float b; //0x0008
-	}; //Size: 0x000C
-
-	class project_t
-	{
-	public:
-		uint8_t should_project; //0x0000
-		char pad_0001[3]; //0x0001
-		float x; //0x0004
-		float y; //0x0008
-		float z; //0x000C
-		float projected_x; //0x0010
-		float projected_y; //0x0014
-		float projected_x2; //0x0018
-		float projected_y2; //0x001C
-		char pad_0020[16]; //0x0020
-	}; //Size: 0x0030
-
-	void WorldToScreen(project_t *project)
-	{
-
-		static const uint32_t current_view_addr = 0x50DEDF0;
-		static const uint32_t world2screen_addr = 0xAD2360;
-
-		uint8_t** view_ptr = (uint8_t**)current_view_addr;
-		*view_ptr = (uint8_t*)0x050DEE10;
-
-		typedef void(__thiscall *world2screen_func)(project_t*, float);
-		world2screen_func world2screen = reinterpret_cast<world2screen_func>(world2screen_addr);
-		world2screen(project, 1.0f);
-	}
-
-	class c_font_cache_mt_safe
-	{
-	private:
-		static const uint32_t constructor_addr = 0x659650;
-		static const uint32_t deconstructor_addr = 0x659720;
-
-	public:
-		c_font_cache_mt_safe()
-		{
-			typedef c_font_cache_mt_safe* (__thiscall *c_font_cache_mt_safe_constructor)(c_font_cache_mt_safe*);
-			c_font_cache_mt_safe_constructor constructor = reinterpret_cast<c_font_cache_mt_safe_constructor>(constructor_addr);
-			constructor(this);
-		};
-
-		~c_font_cache_mt_safe()
-		{
-			typedef void(__thiscall *c_font_cache_mt_safe_deconstructor)(c_font_cache_mt_safe*);
-			c_font_cache_mt_safe_deconstructor deconstructor = reinterpret_cast<c_font_cache_mt_safe_deconstructor>(deconstructor_addr);
-			deconstructor(this);
-		};
-
-	private:
-		uint8_t junk[0x4000]; //TODO
-	};
-
-	class c_rasterizer_draw_string 
-	{
-	private:
-		static const uint32_t constructor_addr = 0xA25F00;
-		static const uint32_t deconstructor_addr = 0x6571D0;
-		static const uint32_t set_draw_area_addr = 0x658d20;
-		static const uint32_t set_color_addr = 0x658df0;
-		static const uint32_t set_style_addr = 0x659070;
-		static const uint32_t draw_addr = 0xA26270;
-
-	public:
-		c_rasterizer_draw_string()
-		{
-			typedef c_rasterizer_draw_string* (__thiscall *c_rasterizer_draw_string_constructor)(c_rasterizer_draw_string*);
-			auto constructor = reinterpret_cast<c_rasterizer_draw_string_constructor>(constructor_addr);
-			constructor(this);
-		};
-
-		~c_rasterizer_draw_string()
-		{
-			typedef void (__thiscall *c_rasterizer_draw_string_deconstructor)(c_rasterizer_draw_string*);
-			auto deconstructor = reinterpret_cast<c_rasterizer_draw_string_deconstructor>(deconstructor_addr);
-			deconstructor(this);
-		};
-
-		void set_draw_area(rect_t* rect)
-		{
-			typedef void(__thiscall *c_raster_draw_string__set_draw_area)(c_rasterizer_draw_string*, rect_t*);
-			auto string_set_draw_area = reinterpret_cast<c_raster_draw_string__set_draw_area>(set_draw_area_addr);
-			string_set_draw_area(this, rect);
-		}
-
-		void set_color(color_t* color)
-		{
-			typedef void(__thiscall *c_raster_draw_string__set_color)(c_rasterizer_draw_string*, color_t*);
-			auto string_set_color = reinterpret_cast<c_raster_draw_string__set_color>(set_color_addr);
-			string_set_color(this, color);
-		}
-
-		void set_style(uint32_t style)
-		{
-			typedef void(__thiscall *c_raster_draw_string__set_style)(c_rasterizer_draw_string*, uint32_t);
-			auto string_set_style = reinterpret_cast<c_raster_draw_string__set_style>(set_style_addr);
-			string_set_style(this, style);
-		}
-
-		void draw()
-		{
-			typedef void(__thiscall *c_raster_draw_string__draw)(c_rasterizer_draw_string*);
-			auto string_draw = reinterpret_cast<c_raster_draw_string__draw>(draw_addr);
-			string_draw(this);
-		}
-	
-	private:
-		uint8_t junk[0x4000]; //TODO
-	};
-}
-
-namespace Pringle
-{
-	static bool isMainMenu = true;
-
 	const static auto Unit_GetHeadPosition = (void(__cdecl*)(uint32_t unitObjectIndex, Vector* position))(0x00B439D0);
-
-	ESP::ESP() : ModuleBase("Pringle")
-	{
-		Enabled = this->AddVariableInt("ESP.Enabled", "esp.enabled", "Enables ESP", eCommandFlagsArchived, 0);
-		Flag1 = this->AddVariableInt("ESP.Flag1", "esp.flag1", "flag1", eCommandFlagsArchived, 0);
-		Flag2 = this->AddVariableInt("ESP.Flag2", "esp.flag2", "flag2", eCommandFlagsArchived, 0);
-
-		Hook::SubscribeMember<DirectX::EndScene>(this, &ESP::OnEndScene);
-		Hook::SubscribeMember<Hooks::PreTick>(this, &ESP::OnPreTick);
-
-		Patches::Core::OnMapLoaded([](auto map) {
-			isMainMenu = !(std::string(map).find("mainmenu") == std::string::npos);
-		});
-
-		// hook
-		/*Halo::old = reinterpret_cast<Halo::RayTrace_t>(0x6D7190);
-		DetourTransactionBegin();
-		DetourUpdateThread(GetCurrentThread());
-		LONG err = DetourAttach((void**)(&Halo::old), Halo::RayTrace_hook);
-		DetourTransactionCommit();*/
-	}
-
-	void DrawString(LPDIRECT3DDEVICE9 device, LPCSTR string, uint32_t x, uint32_t y)
-	{
-		static ID3DXFont* font = nullptr;
-		if (font == nullptr)
-		{
-			D3DXCreateFont(device, 16, 8, 0, 0, false, DEFAULT_CHARSET, OUT_CHARACTER_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, "Verdana", &font);
-		}
-
-		//RECT pos = { x, y + 10, 0, 0 };
-		RECT pos = { 0 };
-		SetRect(&pos, x, y, x, y);
-
-		font->DrawTextA(nullptr, string, -1, &pos, DT_CENTER | DT_NOCLIP, D3DCOLOR_RGBA(255, 255, 255, 255));
-	}
-	
-	static void DrawRect(LPDIRECT3DDEVICE9 device, int x, int y, int w, int h, D3DCOLOR color)
-	{
-		D3DRECT rect;
-		rect.x1 = x;
-		rect.y1 = y;
-		rect.x2 = x + w;
-		rect.y2 = y + h;
-
-		device->Clear(1, &rect, D3DCLEAR_TARGET, color, 0, 0);
-	}
-
-	static void GetCameraPosition(D3DXVECTOR3* pos)
-	{
-		Pointer directorGlobalsPtr(ElDorito::GetMainTls(GameGlobals::Director::TLSOffset)[0]);
-
-		pos->x = directorGlobalsPtr(0x834).Read<float>();
-		pos->y = directorGlobalsPtr(0x838).Read<float>();
-		pos->z = directorGlobalsPtr(0x83C).Read<float>();
-	}
-
-	static void GetCameraUp(D3DXVECTOR3* up)
-	{
-		Pointer directorGlobalsPtr(ElDorito::GetMainTls(GameGlobals::Director::TLSOffset)[0]);
-
-		up->x = directorGlobalsPtr(0x868).Read<float>();
-		up->y = directorGlobalsPtr(0x86C).Read<float>();
-		up->z = directorGlobalsPtr(0x870).Read<float>();
-	}
-
-	static void GetLocalPlayerViewAngles(D3DXVECTOR3* angs)
-	{
-		Pointer playerControlGlobalsPtr(ElDorito::GetMainTls(GameGlobals::Input::TLSOffset)[0]);
-
-		angs->x = playerControlGlobalsPtr(0x30C).Read<float>();
-		angs->y = playerControlGlobalsPtr(0x310).Read<float>();
-		angs->z = playerControlGlobalsPtr(0x314).Read<float>();
-	}
+	const auto GetObjectTransformationMatrix = (void(__cdecl*)(uint32_t objectIndex, Blam::Math::RealMatrix4x3* outMatrix))(0x00B2EC60);
 
 	static Players::PlayerDatum* GetLocalPlayer()
 	{
@@ -263,103 +64,135 @@ namespace Pringle
 		return unit;
 	}
 
-	static void GetLocalPlayerHeadPosition(D3DXVECTOR3* headPos)
+	static void GetHeadPos(uint32_t unitObjectIndex, const Vector& shootDir, Vector& position)
 	{
-		auto lph = Players::GetLocalPlayer(0); // get local player handle
-		if (!lph || lph == DatumHandle::Null)
-			return;
-
-		auto pl = Players::GetPlayers().Get(lph); // get player handle
-		if (!pl)
-			return;
-
-		auto uh = pl->SlaveUnit.Handle;
-		if (uh == -1)
-			return;
-
-		auto unit = Objects::Get(uh);
-		if (!unit)
-			return;
-
-		Vector pos;
-		Unit_GetHeadPosition(pl->SlaveUnit, &pos);
-
-		*headPos = pos;
-		/*headPos->x = pos.I;
-		headPos->y = pos.J;
-		headPos->z = pos.K;*/
+		Unit_GetHeadPosition(unitObjectIndex, &position);
+		position += shootDir * 0.05f;
+		position += shootDir.Right() * 0.05f;
+		position += Vector::Down() * 0.01f;
 	}
 
-	void ToScreen(Vector& pos, Vector& out)
+	static bool GetEquippedWeapon(Patches::Weapon::WeaponInfo& info, Objects::ObjectBase* unit)
 	{
-		Halo::project_t project;
-		project.x = pos.X;
-		project.y = pos.Y;
-		project.z = pos.Z;
-		Halo::WorldToScreen(&project);
-		out.X = project.projected_x;
-		out.Y = project.projected_y;
+		auto ptr = reinterpret_cast<uint8_t*>(unit);
+		if (!ptr)
+			return false;
+
+		auto weaponIndex = reinterpret_cast<uint8_t*>(ptr + 0x2CA);
+		if (weaponIndex[0] == 0xFF)
+			return false;
+
+		auto weapons = reinterpret_cast<uint32_t*>(ptr + 0x2D0);
+		auto weapon = Objects::Get(weapons[weaponIndex[0]]);
+		if (!weapon)
+			return false;
+
+		info.Index = weapon->TagIndex;
+		info.Name = Patches::Weapon::GetName(info);
+		info.TagName = Patches::Weapon::GetTagName(info);
+		info.Offset = Patches::Weapon::GetOffsets(info);
+
+		return true;
+	}
+}
+
+namespace Pringle
+{
+	static bool isMainMenu = true;
+
+	ESP::ESP() : ModuleBase("Pringle")
+	{
+		Enabled = this->AddVariableInt("ESP.Enabled", "esp.enabled", "Enables ESP", eCommandFlagsArchived, 0);
+
+		Hook::SubscribeMember<DirectX::EndScene>(this, &ESP::OnEndScene);
+		Hook::SubscribeMember<Hooks::PreTick>(this, &ESP::OnPreTick);
+
+		Patches::Core::OnMapLoaded([](auto map) {
+			isMainMenu = !(std::string(map).find("mainmenu") == std::string::npos);
+		});
 	}
 
-	void ESP::Draw(const DirectX::EndScene& msg, Blam::Objects::ObjectBase* unit, uint32_t color)
+	void ESP::Draw(const DirectX::EndScene& msg, uint32_t index, Blam::Objects::ObjectBase* unit, uint32_t color)
 	{
-		Vector pos = unit->Position, screen;
-		ToScreen(pos, screen);
 
-		DrawRect(msg.Device, (int)screen.X, (int)screen.Y, 5, 5, color);
 	}
 
 	void ESP::Draw(const DirectX::EndScene& msg, Blam::Math::RealVector3D _pos, uint32_t color)
 	{
-		Vector pos = _pos;
-		Vector screen;
-		ToScreen(pos, screen);
 
-		DrawRect(msg.Device, (int)screen.X, (int)screen.Y, 5, 5, color);
 	}
 
 	void ESP::DrawPlayers(const DirectX::EndScene & msg)
 	{
-		std::lock_guard<std::mutex> lock(this->unit_mutex);
-
 		auto& players = Players::GetPlayers();
 		auto& localPlayerIndex = Players::GetLocalPlayer(0);
 		auto localPlayer = players.Get(localPlayerIndex);
 		if (!localPlayer)
 			return;
 
+		auto teamIndex = localPlayer->Properties.TeamIndex;
+
 		auto localPlayerUnit = Objects::Get(localPlayer->SlaveUnit);
 		if (!localPlayerUnit)
 			return;
 
-		for (auto it = ally_player_units.begin(); it != ally_player_units.end(); ++it) 
+		for (auto it = this->players.begin(); it != this->players.end(); ++it)
 		{
-			auto unit = *it;
-			uint32_t color = D3DCOLOR_RGBA(100, 100, 255, 255);
-			this->Draw(msg, unit, color);
-		}
+			auto info = *it;
 
-		for (auto it = enemy_player_units.begin(); it != enemy_player_units.end(); ++it) 
-		{
-			auto unit = *it;
-			uint32_t color = D3DCOLOR_RGBA(255, 100, 100, 255);
+			auto unit = info.Data;
 
-			this->Draw(msg, unit, color);
-		}
+			uint32_t color;
+			if (info.Player.Properties.TeamIndex == teamIndex)
+				color = info.Visible ? COLOR4I(0, 255, 0, 255) : COLOR4I(0, 0, 255, 255);
+			else
+				color = info.Visible ? COLOR4I(255, 0, 0, 255) : COLOR4I(255, 128, 40, 255);
 
-		for (auto it = hit_enemy_player_units.begin(); it != hit_enemy_player_units.end(); ++it)
-		{
-			auto unit = *it;
-			uint32_t color = D3DCOLOR_RGBA(255, 255, 255, 255);
+			Vector pbot = unit->Position;
+			Vector ptop = pbot;
+			ptop.Z += info.Maxs.Z;
 
-			this->Draw(msg, unit, color);
+			int topX, topY, botX, botY;
+
+			bool vis1 = msg.Draw->ToScreen(ptop.X, ptop.Y, ptop.Z, topX, topY);
+			bool vis2 = msg.Draw->ToScreen(pbot.X, pbot.Y, pbot.Z, botX, botY);
+			// do not move into the if statement, it will leave botX and botY unset if the first condition is true 
+			if (!vis1 && !vis2)
+				continue;
+
+			int height = (botY - topY);
+			int width = height;
+
+			msg.Draw->OutlinedRect(topX - (width / 2), topY, width, height, color);
+
+			const auto name = info.Player.Properties.DisplayName;
+
+			int twidth, theight;
+			FontManager::Instance().GetTextDimensions(name, twidth, theight);
+
+			int drawY = topY - theight;
+
+			Weapon::WeaponInfo winfo;
+			if (GetEquippedWeapon(winfo, unit))
+			{
+				auto wname = winfo.Name.c_str();
+
+				// draw text with shadow
+				msg.Draw->Text(wname, topX + 1, drawY, COLOR4I(0, 0, 0, 255), DT_CENTER);
+				msg.Draw->Text(wname, topX, drawY - 1, COLOR4I(255, 255, 255, 255), DT_CENTER);
+
+				drawY -= theight;
+			}
+
+			// draw text with shadow
+			msg.Draw->Text(name, topX + 1, drawY, COLOR4I(0, 0, 0, 255), DT_CENTER);
+			msg.Draw->Text(name, topX, drawY - 1, COLOR4I(255, 255, 255, 255), DT_CENTER);
 		}
 	}
 
 	void ESP::DrawObjects(const DirectX::EndScene& msg)
 	{
-		std::lock_guard<std::mutex> lock(this->unit_mutex);
-
+		/*
 		auto& players = Players::GetPlayers();
 		auto& localPlayerIndex = Players::GetLocalPlayer(0);
 		auto localPlayer = players.Get(localPlayerIndex);
@@ -368,34 +201,33 @@ namespace Pringle
 
 		auto localPlayerUnit = Objects::Get(localPlayer->SlaveUnit);
 		if (!localPlayerUnit)
-			return;
+			return;*/
 
+		auto& objects = Blam::Objects::GetObjects();
 		for (auto it = objects.begin(); it != objects.end(); ++it)
 		{
-			auto unit = *it;
-			uint32_t color = D3DCOLOR_RGBA(0, 0, 0, 255);
+			auto header = *it;
+			if (header.IsNull())
+				continue;
+
+			if (header.Type != Objects::ObjectType::eObjectTypeBiped 
+				&& header.Type != Objects::ObjectType::eObjectTypeVehicle 
+				&& header.Type != Objects::ObjectType::eObjectTypeWeapon 
+				&& header.Type != Objects::ObjectType::eObjectTypeEquipment
+				&& header.Type != Objects::ObjectType::eObjectTypeProjectile)
+				continue;
+
+			auto unit = header.Data;
 
 			if (!unit)
 				continue;
 
-			/*{
-				Vector pos = unit->Position, screen;
-				ToScreen(pos, screen);
+			uint32_t color = D3DCOLOR_RGBA(0, 255, 0, 150);
 
-				if (screen.X == 0 && screen.Y == 0)
-					continue;
-
-				//DrawRect(msg.Device, screen.X, screen.Y, 5, 5, color);
-
-				char buf[512] = { '\0' };
-				snprintf(buf, 512, "Object: 0x%.8X 0x%.8X 0x%.4X", unit, unit->TagIndex, unit->TagIndex & 0xffff);
-
-				DrawString(msg.Device, buf, screen.X, screen.Y);
-			}*/
-
-			this->Draw(msg, unit, color);
+			this->Draw(msg, it.CurrentDatumIndex.Handle, unit, color);
 		}
 
+		/*
 		for (auto it = hit_objects.begin(); it != hit_objects.end(); ++it)
 		{
 			auto unit = *it;
@@ -404,22 +236,6 @@ namespace Pringle
 			if (!unit)
 				continue;
 
-			/*{
-				Vector pos = unit->Position, screen;
-				ToScreen(pos, screen);
-
-				if (screen.X == 0 && screen.Y == 0)
-					continue;
-
-				//DrawRect(msg.Device, screen.X, screen.Y, 5, 5, color);
-
-				char buf[512] = { '\0' };
-				snprintf(buf, 512, "Object: 0x%.8X 0x%.8X", unit, unit->SimulationEntity);
-
-				DrawString(msg.Device, buf, screen.X, screen.Y + 10);
-			}*/
-
-			
 			this->Draw(msg, unit, color);
 		}
 
@@ -430,6 +246,7 @@ namespace Pringle
 
 			this->Draw(msg, point, color);
 		}
+		*/
 	}
 
 	void ESP::OnEndScene(const DirectX::EndScene & msg)
@@ -437,7 +254,6 @@ namespace Pringle
 		if (isMainMenu || this->Enabled->ValueInt == 0)
 			return;
 
-		auto& objects = Objects::GetObjects();
 		auto localPlayer = GetLocalPlayer();
 		if (!localPlayer)
 			return;
@@ -446,19 +262,19 @@ namespace Pringle
 		if (!localPlayerUnit)
 			return;
 
-		char buf[512] = { '\0' };
-		snprintf(buf, 512, "Local Player: 0x%.8X", localPlayerUnit->TagIndex);
-		DrawString(msg.Device, buf, 100, 100);
+		std::lock_guard<std::mutex> lock(this->unit_mutex);
+
+		msg.Draw->CaptureState();
 
 		this->DrawPlayers(msg);
-		this->DrawObjects(msg);
+		//this->DrawObjects(msg);
+
+		msg.Draw->ReleaseState();
 	}
 
 	void ESP::UpdatePlayers(const Hooks::PreTick& msg)
 	{
-		ally_player_units.clear();
-		enemy_player_units.clear();
-		hit_enemy_player_units.clear();
+		players.clear();
 
 		auto& players = Players::GetPlayers();
 		auto& localPlayerIndex = Players::GetLocalPlayer(0);
@@ -470,38 +286,39 @@ namespace Pringle
 		if (!localPlayerUnit)
 			return;
 
+		Vector playerPos;
+		GetHeadPos(localPlayer->SlaveUnit, localPlayerUnit->Forward, playerPos);
+
 		for (auto it = players.begin(); it != players.end(); ++it) {
-			const auto& unitObjectIndex = it->SlaveUnit.Handle;
+			auto& player = *it;
+			auto& unitObjectIndex = it->SlaveUnit.Handle;
 			if (unitObjectIndex == -1)
 				continue;
 
 			if (localPlayer->SlaveUnit.Handle == unitObjectIndex)
 				continue;
 
-			const auto& unit = Objects::Get(unitObjectIndex);
+			auto unit = Objects::Get(unitObjectIndex);
 			if (!unit)
 				continue;
 
 			if (it->DeadSlaveUnit)
 				continue;
 
-			if (it->Properties.TeamIndex != localPlayer->Properties.TeamIndex)
+			Vector targetPos;
+			GetHeadPos(unitObjectIndex, unit->Forward, targetPos);
+
+			bool visible = Halo::SimpleHitTest(playerPos, targetPos, localPlayer->SlaveUnit, unitObjectIndex);
+
+			Vector mins(0, 0, 0), maxs(0, 0, 0); // we don't watch uninitialized vectors
+			auto bb = Forge::GetObjectBoundingBox(unit->TagIndex);
+			if (bb)
 			{
-				Vector playerPos;
-				Vector targetPos;
-
-				Unit_GetHeadPosition(localPlayer->SlaveUnit, &playerPos);
-				Unit_GetHeadPosition(unitObjectIndex, &targetPos);
-
-				if (Halo::SimpleHitTest(playerPos, targetPos, localPlayer->SlaveUnit, -1)) {
-	
-					hit_enemy_player_units.push_back(unit);
-				}
-				else
-					enemy_player_units.push_back(unit);
+				mins = Vector(bb->MinX, bb->MinY, bb->MinZ);
+				maxs = Vector(bb->MaxX, bb->MaxY, bb->MaxZ);
 			}
-			else
-				ally_player_units.push_back(unit);
+
+			this->players.emplace_back(player, unit, visible, mins, maxs);
 		}
 	}
 
@@ -524,22 +341,8 @@ namespace Pringle
 			if (!unit)
 				continue;
 
-			//if (!unit->SimulationEntity)
-			//	continue;
-
 			{
-				Vector localPos = localPlayerUnit->Position;
-				localPos.Z += .75f;
-				Vector targetPos = unit->Position;
-				//targetPos.K += 1.0f;
-
-				if (Halo::SimpleHitTest(localPos, targetPos, localPlayer->SlaveUnit /*-1*/, /*unitObjectIndex*/ -1))
-				{
-					//this->hit_points.push_back({ localPos, targetPos });
-					this->hit_objects.push_back(unit);
-				}
-				else
-					this->objects.push_back(unit);
+				this->objects.push_back(unit);
 			}		
 		}
 	}
