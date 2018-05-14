@@ -142,10 +142,6 @@ namespace Pringle
 
 			auto unit = info.Data;
 
-			auto bb = Forge::GetObjectBoundingBox(unit->TagIndex);
-			if (!bb)
-				return;
-
 			uint32_t color;
 			if (info.Player.Properties.TeamIndex == teamIndex)
 				color = info.Visible ? COLOR4I(0, 255, 0, 255) : COLOR4I(0, 0, 255, 255);
@@ -154,7 +150,7 @@ namespace Pringle
 
 			Vector pbot = unit->Position;
 			Vector ptop = pbot;
-			ptop.Z += bb->MaxZ;
+			ptop.Z += info.Maxs.Z;
 
 			int topX, topY, botX, botY;
 
@@ -314,7 +310,15 @@ namespace Pringle
 
 			bool visible = Halo::SimpleHitTest(playerPos, targetPos, localPlayer->SlaveUnit, unitObjectIndex);
 
-			this->players.emplace_back(player, unit, visible);
+			Vector mins(0, 0, 0), maxs(0, 0, 0); // we don't watch uninitialized vectors
+			auto bb = Forge::GetObjectBoundingBox(unit->TagIndex);
+			if (bb)
+			{
+				mins = Vector(bb->MinX, bb->MinY, bb->MinZ);
+				maxs = Vector(bb->MaxX, bb->MaxY, bb->MaxZ);
+			}
+
+			this->players.emplace_back(player, unit, visible, mins, maxs);
 		}
 	}
 

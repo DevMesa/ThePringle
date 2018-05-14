@@ -20,8 +20,10 @@ namespace Pringle
 		Blam::Players::PlayerDatum& Player;
 		Blam::Objects::ObjectBase* Data;
 		bool Visible;
+		Vector Mins;
+		Vector Maxs;
 
-		PlayerData(Blam::Players::PlayerDatum& player, Blam::Objects::ObjectBase* data, bool visible) : Player(player), Data(data), Visible(visible) { }
+		PlayerData(Blam::Players::PlayerDatum& player, Blam::Objects::ObjectBase* data, bool visible, Vector mins, Vector maxs) : Player(player), Data(data), Visible(visible), Mins(mins), Maxs(maxs) { }
 	};
 
 	class ESP :
