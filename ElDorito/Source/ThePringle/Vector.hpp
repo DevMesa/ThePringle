@@ -51,6 +51,7 @@ namespace Pringle
 		Vector Parallel(const Vector& axis) const;
 		Vector Perp(const Vector& axis) const;
 		Vector RotateAroundAxis(const Vector& axis, Angle angle);
+		Vector ProjectOnPlane(const Vector& normal);
 
 		EulerAngles Angles() const;
 		bool ToScreen(const Vector& cam_pos, const QAngle& cam_ang, Angle fov, float width, float height, float& out_x, float& out_y) const;

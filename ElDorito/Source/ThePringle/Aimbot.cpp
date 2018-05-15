@@ -69,19 +69,10 @@ void Aimbot::GetPlayers(const AimbotEvents::GetTargets& msg)
 		if (!unit)
 			continue;
 
-		QAngle null_viewang = QAngle(Quaternion::Identity());
-		AimbotEvents::Target::Info info(
-			/*Velocity =*/ reinterpret_cast<Vector&>(unit->Velocity),
-			/*ShootDirection =*/ reinterpret_cast<Vector&>(unit->Forward),
-			/*ViewAngles =*/ null_viewang,
-			/*Team =*/ it->Properties.TeamIndex,
-			/*UnitIndex =*/ unitObjectIndex,
-			/*Alive =*/ !it->DeadSlaveUnit,
-			/*Player =*/ true
-		);
-		
 		Vector pos;
-		
+		Vector& vel = reinterpret_cast<Vector&>(unit->Velocity);
+		Vector& shoot_dir = reinterpret_cast<Vector&>(unit->Forward);
+
 		switch (msg.AimAt)
 		{
 		default:
@@ -90,14 +81,26 @@ void Aimbot::GetPlayers(const AimbotEvents::GetTargets& msg)
 			break;
 		case AimbotEvents::AimPosition::Head:
 			Unit_GetHeadPosition(unitObjectIndex, &pos);
-			pos += info.ShootDirection * 0.05f; // forward ness for the head pos
-			pos += info.ShootDirection.Right() * 0.05f;
+			pos += shoot_dir * 0.05f; // forward ness for the head pos
+			pos += shoot_dir.Right() * 0.05f;
 			pos += Vector::Down() * 0.01f;
 			break;
 		case AimbotEvents::AimPosition::Center:
 			pos = unit->Center;
 			break;
 		}
+
+		QAngle null_viewang = QAngle(Quaternion::Identity());
+		AimbotEvents::Target::Info info(
+			/*Velocity =*/ vel,
+			/*ShootDirection =*/ shoot_dir,
+			/*ViewAngles =*/ null_viewang,
+			/*OriginOffset =*/ pos - unit->Position,
+			/*Team =*/ it->Properties.TeamIndex,
+			/*UnitIndex =*/ unitObjectIndex,
+			/*Alive =*/ !it->DeadSlaveUnit,
+			/*Player =*/ true
+		);
 
 		msg.GotTarget(AimbotEvents::Target(pos, info));
 	}
@@ -220,6 +223,7 @@ void Aimbot::OnTick(const PostTick& msg)
 		/*Velocity =*/ reinterpret_cast<Vector&>(localplayerunit->Velocity),
 		/*ShootDirection =*/ shootdir,
 		/*ViewAngles =*/ null_viewang,
+		/*OriginOffset =*/ shootpos - localplayerunit->Position,
 		/*Team =*/ localplayer->Properties.TeamIndex,
 		/*UnitIndex =*/ localplayer->SlaveUnit.Handle,
 		/*Alive =*/ !localplayer->DeadSlaveUnit,

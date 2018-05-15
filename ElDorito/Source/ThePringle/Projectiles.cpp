@@ -15,6 +15,7 @@
 #include "../Blam/Tags/Objects/Projectile.hpp"
 #include "../Blam/Tags/Game/Globals.hpp"
 #include "../Blam/Tags/Items/DefinitionWeapon.hpp"
+#include "Halo/Halo.hpp"
 
 using namespace Pringle::Hooks;
 using namespace Modules;
@@ -29,11 +30,22 @@ namespace Pringle
 	{
 		this->Enabled = this->AddVariableInt("Projectiles.Enabled", "projectiles.enabled", "Enable projectile support", eCommandFlagsArchived, 1);
 		this->MaxTimeToImpact = this->AddVariableFloat("Projectiles.Max.TimeToImpact", "projectiles.max.timetoimpact", "Maximum time to impact in seconds", eCommandFlagsArchived, 1.0);
-		this->MaxAcceleration = this->AddVariableFloat("Projectiles.Max.Jerk", "projectiles.max.jerk", "Maximum jerk", eCommandFlagsArchived, 0.5);
+		this->MaxJerk = this->AddVariableFloat("Projectiles.Max.Jerk", "projectiles.max.jerk", "Maximum jerk", eCommandFlagsArchived, 0.5);
 
 		// make the hook first so we can divert the OnTarget
 		Hook::SubscribeMember<Tick>(this, &Projectiles::TrackDerivatives, HookPriority::First);
 		Hook::SubscribeMember<AimbotEvents::ScoreTarget>(this, &Projectiles::FirstOnScoreTarget, HookPriority::First);
+
+		Vector src(0, 0, 10);
+		Vector dst(50, 0, -10);
+		Vector dir = (dst - src).Normal();
+
+		Vector hitnorm(0, 0, 1);
+		Vector hitpos = src + dir * 5.0f;
+
+		float hitpos_end_distance = (hitpos - dst).Length();
+
+		Vector goodpos = hitpos + dir.ProjectOnPlane(hitnorm) * hitpos_end_distance;
 
 		TTI = this->CreateSimpleTimeToImpactCalculator(50.0f);
 	}
@@ -139,7 +151,7 @@ namespace Pringle
 
 		// what's defweap->Barrels[0].CrateProjectile
 
-		if (!defweap || !defweap->Barrels)
+		if (!defweap || !defweap->Barrels || defweap->Barrels.Count == 0)
 			return;
 
 		auto* defproj = defweap->Barrels[0].InitialProjectile.GetDefinition<Blam::Tags::Objects::Projectile>();
@@ -150,7 +162,7 @@ namespace Pringle
 		TTI = this->CreateSimpleTimeToImpactCalculator(defproj->FinalVelocity);
 		
 		// update the position of the target so we aim at that instead
-		const Vector& pos = e.What.Position;
+		Vector pos = e.What.Position;
 		Vector vel = e.What.Information.Velocity;
 		Vector acel = Vector::Zero();
 
@@ -170,8 +182,8 @@ namespace Pringle
 		{
 			const float was_time = time;
 
-			Vector test_pos = this->EstimatePosition(pos, vel, acel, time);
-			time = this->TimeToImpact(e.Self.Position, test_pos, TTI);
+			pos = this->EstimatePosition(e.What.Position, vel, acel, time, false, e);
+			time = this->TimeToImpact(e.Self.Position, pos, TTI);
 
 			const float err = std::abs(time - was_time);
 
@@ -187,13 +199,20 @@ namespace Pringle
 			last_err = err;
 		}
 		
-		e.What.Position = this->EstimatePosition(pos, vel, acel, time);
-
 		// don't try to aim past the max range
-		if (time > this->MaxTimeToImpact->ValueFloat ||
-			(e.What.Position - e.Self.Position).Length() > defproj->MaximumRange)
+		if (time > this->MaxTimeToImpact->ValueFloat || (pos - e.Self.Position).Length() > defproj->MaximumRange)
 		{
 			e.Importance *= 0;
+			return;
+		}
+		
+		// do 1 more manual iteration, but with tracing on so we don't shoot thru walls
+		// and then update their final pos with one more iteration
+		{
+			pos = this->EstimatePosition(e.What.Position, vel, acel, time, true, e);
+			time = this->TimeToImpact(e.Self.Position, pos, TTI);
+
+			e.What.Position = this->EstimatePosition(e.What.Position, vel, acel, time, true, e);
 		}
 	}
 
@@ -211,12 +230,33 @@ namespace Pringle
 		return tti(distance);
 	}
 
-	Vector Projectiles::EstimatePosition(const Vector& position, const Vector& velocity, const Vector& acceleration, float time)
+	Vector Projectiles::EstimatePosition(const Vector& position, const Vector& velocity, const Vector& acceleration, float time, bool trace, const Hooks::AimbotEvents::ScoreTarget& e)
 	{
-		return 
+		Vector estimated = 
 			position +                           // 
 			velocity * time +                    // first derivative of position
 			acceleration * time * time * 0.5f;   // second derivative of position (first derivative of first derivative of position)
+
+		// do a trace from position, to estimated position, to see if it collides with anything,
+		// if it does, correct it to the surface normal of what the trace hit
+
+		if (trace)
+		{
+			const float step_height = 0.1f; // TODO: put a real value here
+			const Vector offset = e.What.Information.OriginOffset + Vector::Up() * step_height; // add a bit 
+
+			Halo::TraceResult trace;
+			if (Halo::Trace(trace, position - offset, estimated - offset, e.What.Information.UnitIndex, -1))
+			{
+				Vector dir = (estimated - position).Normal();
+				float hitpos_est_distance = (trace.HitPos - estimated).Length();
+
+				estimated = trace.HitPos + dir.ProjectOnPlane(trace.SurfaceNormal) * hitpos_est_distance;
+				estimated += offset; // restore the offset
+			}
+		}
+
+		return estimated;
 	}
 
 }

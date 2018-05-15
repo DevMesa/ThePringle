@@ -34,6 +34,10 @@ namespace Halo
 		char pad_007A[22]; //0x007A
 		int8_t N00000096; //0x0090
 		char pad_0091[43]; //0x0091
+
+		// these are custom
+		Pringle::Vector HitPos;
+
 	}; //Size: 0x00BC
 
 	inline bool Trace(TraceResult& result, Pringle::Vector start, Pringle::Vector end, uint32_t unitIndex1, uint32_t unitIndex2)
@@ -47,7 +51,10 @@ namespace Halo
 		auto fn = reinterpret_cast<bool(*)(uint32_t, uint32_t, Pringle::Vector*, Pringle::Vector*, uint32_t, uint32_t, TraceResult*)> (addr);
 		bool fn_result = fn(flags1, flags2, &start, &end, unitIndex1, unitIndex2, &result);
 
-		return !fn_result;
+		// todo: this isn't right
+		result.HitPos = start + result.N00000013;
+
+		return fn_result;
 	}
 
 	inline bool SimpleHitTest(Pringle::Vector start, Pringle::Vector end, uint32_t unitIndex1, uint32_t unitIndex2)

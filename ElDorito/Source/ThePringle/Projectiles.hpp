@@ -68,7 +68,7 @@ namespace Pringle
 		}
 	};
 
-	using ProjectileDerivativeCalculator = DerivativeCalculator<Vector, 4, 4>;
+	using ProjectileDerivativeCalculator = DerivativeCalculator<Vector, 4, 10>;
 
 	using TimeToImpactCalculator = std::function<float(const Vector& distance)>;
 	using PositionCalculator = std::function<float(float time)>;
@@ -84,7 +84,7 @@ namespace Pringle
 		uint32_t LastTicks;
 		Modules::Command* Enabled;
 		Modules::Command* MaxTimeToImpact;
-		Modules::Command* MaxAcceleration;
+		Modules::Command* MaxJerk;
 		ProjectileDerivativeCalculator* GetPositionDerivatives(uint32_t id);
 		void TrackDerivatives(const Pringle::Hooks::Tick& e);
 		void FirstOnScoreTarget(const Hooks::AimbotEvents::ScoreTarget& e);
@@ -94,7 +94,7 @@ namespace Pringle
 		// calculates the time to impact for something not moving
 		float TimeToImpact(const Vector& source, const Vector& position, TimeToImpactCalculator& tti);
 
-		Vector EstimatePosition(const Vector& position, const Vector& velocity, const Vector& acceleration, float time);
+		Vector EstimatePosition(const Vector& position, const Vector& velocity, const Vector& acceleration, float time, bool trace, const Hooks::AimbotEvents::ScoreTarget& e);
 	};
 }
 

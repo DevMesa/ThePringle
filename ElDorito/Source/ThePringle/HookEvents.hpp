@@ -96,16 +96,18 @@ namespace Pringle
 					const Vector& Velocity;
 					const Vector& ShootDirection;
 					const QAngle& ViewAngles;
+					const Vector OriginOffset;
 
 					const int Team;
 					const uint32_t UnitIndex;
 					const bool Alive : 1;
 					const bool Player : 1;
 
-					Info(const Vector& vel, const Vector& shootdir, const QAngle& angs, int team, int unitindex, bool alive, bool player) :
+					Info(const Vector& vel, const Vector& shootdir, const QAngle& angs, const Vector& origin_offset, int team, int unitindex, bool alive, bool player) :
 						Velocity(vel),
 						ShootDirection(shootdir),
 						ViewAngles(angs),
+						OriginOffset(origin_offset),
 						Team(team),
 						UnitIndex(unitindex),
 						Alive(alive),

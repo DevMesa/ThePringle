@@ -97,6 +97,11 @@ namespace Pringle
 		return this->Perp(axis) * cos_theta + axis.Cross(*this) * sin_theta + this->Parallel(axis);
 	}
 
+	Vector Vector::ProjectOnPlane(const Vector& normal)
+	{
+		return *this - normal * this->Dot(normal);
+	}
+
 	EulerAngles Vector::Angles() const
 	{
 		auto norm = this->Normal();
