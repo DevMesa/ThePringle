@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cassert>
 
 //#include "../../Blam/Math/RealVector3D.hpp"
 #include "Vector.hpp"
@@ -9,20 +10,29 @@ namespace Halo
 {
 	struct TraceResult
 	{
-		Pringle::Vector N00000013; //0x0000
-		char pad_000C[8]; //0x000C
+		//Pringle::Vector N00000013; //0x0000
+		int HitFlagsOrSurfaceMaybe;
+		float NormalizedDistance; // 0 = startpos, 1 = endpos, 0.5 = midway
+		Pringle::Vector HitPos; //0x0014
 		Pringle::Vector N00000016; //0x0014
 		int16_t hit2; //0x0020
 		int16_t hit3; //0x0022
 		Pringle::Vector SurfaceNormal;
-		char pad_0030[4]; //0x0030
+		float SurfaceNormalW; // idk, it just sets 4 soo
 		int16_t hit4; //0x0034
 		int32_t N00000046; //0x0036
 		char pad_003A[6]; //0x003A
 		int32_t N00000019; //0x0040
 		int32_t oven; //0x0044
 		int32_t N0000003A; //0x0048
-		char pad_004C[6]; //0x004C
+		
+		bool BoolA;
+		bool BoolB;
+		bool BoolC;
+		bool BoolD;
+		bool Hit_maybe;
+		bool BoolF;
+
 		int32_t N00000086; //0x0052
 		int32_t N00000087; //0x0056
 		char pad_005A[10]; //0x005A
@@ -35,59 +45,41 @@ namespace Halo
 		int8_t N00000096; //0x0090
 		char pad_0091[43]; //0x0091
 
-		// these are custom
-		Pringle::Vector HitPos;
-
 	}; //Size: 0x00BC
 
-	inline bool Trace(TraceResult& result, Pringle::Vector start, Pringle::Vector end, uint32_t unitIndex1, uint32_t unitIndex2)
+	inline bool Trace(TraceResult& result, const Pringle::Vector& start, const Pringle::Vector& end, uint32_t unitIndex1, uint32_t unitIndex2)
 	{
-		end = result.N00000013 = end - start;
+		Pringle::Vector direction_magnitude = end - start;
 
 		uint32_t flags1 = (*(uint32_t*)0x471A8F8) | 0x200;
 		uint32_t flags2 = *(uint32_t*)0x471A8FC;
 
 		static const uint32_t addr = 0x6D7160;
-		auto fn = reinterpret_cast<bool(*)(uint32_t, uint32_t, Pringle::Vector*, Pringle::Vector*, uint32_t, uint32_t, TraceResult*)> (addr);
-		bool fn_result = fn(flags1, flags2, &start, &end, unitIndex1, unitIndex2, &result);
-
-		// todo: this isn't right
-		result.HitPos = start + result.N00000013;
+		auto fn = reinterpret_cast<bool(*)(uint32_t, uint32_t, const Pringle::Vector*, const Pringle::Vector*, uint32_t, uint32_t, TraceResult*)> (addr);
+		bool fn_result = fn(flags1, flags2, &start, &direction_magnitude, unitIndex1, unitIndex2, &result);
 
 		return fn_result;
 	}
 
-	inline bool SimpleHitTest(Pringle::Vector start, Pringle::Vector end, uint32_t unitIndex1, uint32_t unitIndex2)
+	inline bool SimpleHitTest(const Pringle::Vector start, const Pringle::Vector end, uint32_t unitIndex1, uint32_t unitIndex2)
 	{
 		TraceResult result;
 
-		result.N00000013 = end - start;
-		end = result.N00000013;
+		Pringle::Vector direction_magnitude = end - start;
 
 		uint32_t flags1 = (*(uint32_t*)0x471A8F8) | 0x200;
 		uint32_t flags2 = *(uint32_t*)0x471A8FC;
 
+		auto precopy1 = start;
+		auto precopy2 = end;
+
 		static const uint32_t addr = 0x6D7160;
-		auto fn = reinterpret_cast<bool(*)(uint32_t, uint32_t, Pringle::Vector*, Pringle::Vector*, uint32_t, uint32_t, TraceResult*)> (addr);
-		bool fn_result = fn(flags1, flags2, &start, &end, unitIndex1, unitIndex2, &result);
+		auto fn = reinterpret_cast<bool(*)(uint32_t, uint32_t, const Pringle::Vector*, const Pringle::Vector*, uint32_t, uint32_t, TraceResult*)> (addr);
+		bool fn_result = fn(flags1, flags2, &start, &direction_magnitude, unitIndex1, unitIndex2, &result);
+
+		assert(start.Y == precopy1.Y);
+		assert(end.Y == precopy2.Y);
 
 		return !fn_result;
 	}
-
-	/*inline bool SimpleHitTest(Pringle::Vector* start, Pringle::Vector* end, uint32_t unitIndex1, uint32_t unitIndex2)
-	{
-		TraceResult result;
-
-		result.N00000013 = *end - *start;
-		*end = result.N00000013;
-
-		uint32_t flags1 = (*(uint32_t*)0x471A8F8) | 0x200;
-		uint32_t flags2 = *(uint32_t*)0x471A8FC;
-
-		static const uint32_t addr = 0x6D7160;
-		auto fn = reinterpret_cast<bool(*)(uint32_t, uint32_t, Pringle::Vector*, Pringle::Vector*, uint32_t, uint32_t, TraceResult*) > (addr);
-		bool fn_result = fn(flags1, flags2, start, end, unitIndex1, unitIndex2, &result);
-
-		return !fn_result;
-	}*/
 }
