@@ -107,6 +107,7 @@ namespace Pringle
 		Modules::Command* Enabled;
 		Modules::Command* MaxTimeToImpact;
 		Modules::Command* MaxJerk;
+		Modules::Command* MaxAutoShootJerk;
 		ProjectileDerivativeCalculator* GetPositionDerivatives(uint32_t id);
 		void TrackDerivatives(const Pringle::Hooks::Tick& e);
 		void FirstOnScoreTarget(const Hooks::AimbotEvents::ScoreTarget& e);

@@ -130,7 +130,8 @@ namespace Pringle
 			{
 				const Target& Self;
 				const Target& What;
-				float& Importance;
+				mutable float Importance;
+				mutable bool DisableAutoshoot;
 
 				static float Calculate(float value, float importance)
 				{
@@ -138,15 +139,16 @@ namespace Pringle
 					return (1.0f - importance) + value * importance;
 				}
 
-				ScoreTarget(const Target& self, const Target& what, float& out_importance) :
+				ScoreTarget(const Target& self, const Target& what) :
 					Self(self),
 					What(what),
-					Importance(out_importance)
+					Importance(100.0f),
+					DisableAutoshoot(false)
 				{
+					// Importance:
 					// the default value that will be scaled and shit
 					// shouldn't really matter if it's 100 or 1,
 					// but 0 to 100 is a nice range for humans reading it
-					out_importance = 100.0f;
 				}
 			};
 

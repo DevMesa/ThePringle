@@ -236,6 +236,7 @@ void Aimbot::OnTick(const PostTick& msg)
 		Vector best_pos;
 		int best_unitindex = 0;
 		float best_score = std::numeric_limits<float>::epsilon(); // the lowest score we will accept
+		bool best_disableautoshoot = false;
 		bool best_got = false;
 
 		AimbotEvents::AimPosition::Enum aimpos = AimbotEvents::AimPosition::Origin;
@@ -249,14 +250,15 @@ void Aimbot::OnTick(const PostTick& msg)
 
 		Hook::Call<AimbotEvents::GetTargets>([&](const AimbotEvents::Target& targ) -> void
 		{
-			float score = 0;
-			Hook::Call<AimbotEvents::ScoreTarget>(self, targ, score);
+			AimbotEvents::ScoreTarget e(self, targ);
+			Hook::CallPremade<AimbotEvents::ScoreTarget>(e);
 
-			if (score > best_score)
+			if (e.Importance > best_score)
 			{
-				best_score = score;
+				best_score = e.Importance;
 				best_pos = targ.Position;
 				best_unitindex = targ.Information.UnitIndex;
+				best_disableautoshoot = e.DisableAutoshoot;
 				best_got = true;
 			}
 		}, aimpos);
@@ -276,7 +278,7 @@ void Aimbot::OnTick(const PostTick& msg)
 				this->LastTargetPosition = copy;
 
 				// shoot is here so we use the non-laggy position for shooting
-				this->Shoot = this->AutoShoot->ValueInt != 0;
+				this->Shoot = this->AutoShoot->ValueInt != 0 && !best_disableautoshoot;
 			}
 			else
 			{

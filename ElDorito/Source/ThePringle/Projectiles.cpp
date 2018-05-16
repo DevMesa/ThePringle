@@ -30,7 +30,8 @@ namespace Pringle
 	{
 		this->Enabled = this->AddVariableInt("Projectiles.Enabled", "projectiles.enabled", "Enable projectile support", eCommandFlagsArchived, 1);
 		this->MaxTimeToImpact = this->AddVariableFloat("Projectiles.Max.TimeToImpact", "projectiles.max.timetoimpact", "Maximum time to impact in seconds", eCommandFlagsArchived, 1.0);
-		this->MaxJerk = this->AddVariableFloat("Projectiles.Max.Jerk", "projectiles.max.jerk", "Maximum jerk", eCommandFlagsArchived, 800.0);
+		this->MaxJerk = this->AddVariableFloat("Projectiles.Max.Jerk", "projectiles.max.jerk", "Maximum jerk before the derivatives are reset", eCommandFlagsArchived, 800.0);
+		this->MaxAutoShootJerk = this->AddVariableFloat("Projectiles.Max.AutoShootJerk", "projectiles.max.autoshootjerk", "Maximum jerk to stop autoshooting", eCommandFlagsArchived, 200.0);
 
 		// make the hook first so we can divert the OnTarget
 		Hook::SubscribeMember<Tick>(this, &Projectiles::TrackDerivatives, HookPriority::First);
@@ -178,7 +179,10 @@ namespace Pringle
 		{
 			vel = dc->Velocity();
 			acel = dc->Acceleration();
-			//auto jerk = dc->Jerk();
+			const auto& jerk = dc->Jerk();
+
+			if (jerk.Length() > this->MaxAutoShootJerk->ValueFloat)
+				e.DisableAutoshoot = true;
 		}
 
 		float last_err = 1000.0f; // 1k seconds, should be high enough...
