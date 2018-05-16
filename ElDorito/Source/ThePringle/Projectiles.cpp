@@ -30,7 +30,7 @@ namespace Pringle
 	{
 		this->Enabled = this->AddVariableInt("Projectiles.Enabled", "projectiles.enabled", "Enable projectile support", eCommandFlagsArchived, 1);
 		this->MaxTimeToImpact = this->AddVariableFloat("Projectiles.Max.TimeToImpact", "projectiles.max.timetoimpact", "Maximum time to impact in seconds", eCommandFlagsArchived, 1.0);
-		this->MaxJerk = this->AddVariableFloat("Projectiles.Max.Jerk", "projectiles.max.jerk", "Maximum jerk", eCommandFlagsArchived, 0.5);
+		this->MaxJerk = this->AddVariableFloat("Projectiles.Max.Jerk", "projectiles.max.jerk", "Maximum jerk", eCommandFlagsArchived, 800.0);
 
 		// make the hook first so we can divert the OnTarget
 		Hook::SubscribeMember<Tick>(this, &Projectiles::TrackDerivatives, HookPriority::First);
@@ -81,7 +81,14 @@ namespace Pringle
 				ptr->Derivatives[0] = position;
 			}
 			else
+			{
 				it->second->Update(position, time);
+
+				float jerk = it->second->Jerk().Length();
+
+				if (it->second->Samples > 2 && jerk > this->MaxJerk->ValueFloat)
+					it->second->Reset();
+			}
 		};
 
 		// standard player iterate

@@ -19,6 +19,9 @@ namespace Pringle
 
 		T Averaged[ToDerivative];
 
+		size_t Samples = 0;
+		const size_t MaxSamples = AverageSamples + 1;
+
 		// calculate the new derivatives
 		void Update(const T& newpos, float deltatime)
 		{
@@ -31,16 +34,35 @@ namespace Pringle
 				Last[i][0] = Derivatives[i];
 
 			Derivatives[0] = newpos;
+			if(Samples <= AverageSamples) // <= cause it contains our current sample too
+				Samples++;
+
 			for (int i = 1; i < ToDerivative; i++)
 			{
 				Derivatives[i] = (Derivatives[i - 1] - Last[i - 1][0]) / deltatime;
 
 				Vector average = Derivatives[i];
-				for (int a = 0; a < AverageSamples; a++)
+				for (int a = 0; a < Samples - 1; a++)
 					average += Last[i][a];
-				average /= (float)(AverageSamples + 1);
+				average /= (float)(Samples);
 				Averaged[i] = average;
 			}
+		}
+
+		void Reset()
+		{
+
+			// recompute the average without the latest result so we still have some old sane derivatives
+			for (int i = 1; i < ToDerivative; i++)
+			{
+				Vector average = Vector();
+				for (int a = 0; a < Samples - 1; a++)
+					average += Last[i][a];
+				average /= (float)(Samples - 1);
+				Averaged[i] = average;
+			}
+
+			Samples = 1;
 		}
 
 		const T& Velocity()
@@ -68,7 +90,7 @@ namespace Pringle
 		}
 	};
 
-	using ProjectileDerivativeCalculator = DerivativeCalculator<Vector, 4, 10>;
+	using ProjectileDerivativeCalculator = DerivativeCalculator<Vector, 4, 6>;
 
 	using TimeToImpactCalculator = std::function<float(const Vector& distance)>;
 	using PositionCalculator = std::function<float(float time)>;

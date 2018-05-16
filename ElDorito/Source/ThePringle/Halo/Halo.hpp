@@ -61,7 +61,7 @@ namespace Halo
 		return fn_result;
 	}
 
-	inline bool SimpleHitTest(const Pringle::Vector start, const Pringle::Vector end, uint32_t unitIndex1, uint32_t unitIndex2)
+	inline bool SimpleHitTest(const Pringle::Vector& start, const Pringle::Vector& end, uint32_t unitIndex1, uint32_t unitIndex2)
 	{
 		TraceResult result;
 
