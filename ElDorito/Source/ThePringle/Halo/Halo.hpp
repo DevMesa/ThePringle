@@ -14,7 +14,15 @@ namespace Halo
 		int HitFlagsOrSurfaceMaybe;
 		float NormalizedDistance; // 0 = startpos, 1 = endpos, 0.5 = midway
 		Pringle::Vector HitPos; //0x0014
-		Pringle::Vector N00000016; //0x0014
+		int16_t unknownsad1;
+		int16_t unknownsad2;
+		// https://ht.transparencytoolkit.org/rcs-dev%5Cshare/HOME/cod/CRT/crt/src/concrt/StructuredWorkStealingQueue.h
+		// https://github.com/neciudan/CudaProgramming/blob/master/ps1/utils.h
+		// https://msdn.microsoft.com/en-us/library/dd504801.aspx
+		// maybe a callback queue
+		// concrt.h
+		/*Concurrency::details::StructuredWorkStealingQueue<Concurrency::details::_UnrealizedChore,Concurrency::details::_CriticalNonReentrantLock>*/ void* MutexdWorkerQueue;
+		int32_t unknownbasds;
 		int16_t hit2; //0x0020
 		int16_t hit3; //0x0022
 		Pringle::Vector SurfaceNormal;
