@@ -96,16 +96,18 @@ namespace Pringle
 					const Vector& Velocity;
 					const Vector& ShootDirection;
 					const QAngle& ViewAngles;
+					const Vector OriginOffset;
 
 					const int Team;
 					const uint32_t UnitIndex;
 					const bool Alive : 1;
 					const bool Player : 1;
 
-					Info(const Vector& vel, const Vector& shootdir, const QAngle& angs, int team, int unitindex, bool alive, bool player) :
+					Info(const Vector& vel, const Vector& shootdir, const QAngle& angs, const Vector& origin_offset, int team, int unitindex, bool alive, bool player) :
 						Velocity(vel),
 						ShootDirection(shootdir),
 						ViewAngles(angs),
+						OriginOffset(origin_offset),
 						Team(team),
 						UnitIndex(unitindex),
 						Alive(alive),
@@ -128,7 +130,8 @@ namespace Pringle
 			{
 				const Target& Self;
 				const Target& What;
-				float& Importance;
+				mutable float Importance;
+				mutable bool DisableAutoshoot;
 
 				static float Calculate(float value, float importance)
 				{
@@ -136,15 +139,16 @@ namespace Pringle
 					return (1.0f - importance) + value * importance;
 				}
 
-				ScoreTarget(const Target& self, const Target& what, float& out_importance) :
+				ScoreTarget(const Target& self, const Target& what) :
 					Self(self),
 					What(what),
-					Importance(out_importance)
+					Importance(100.0f),
+					DisableAutoshoot(false)
 				{
+					// Importance:
 					// the default value that will be scaled and shit
 					// shouldn't really matter if it's 100 or 1,
 					// but 0 to 100 is a nice range for humans reading it
-					out_importance = 100.0f;
 				}
 			};
 

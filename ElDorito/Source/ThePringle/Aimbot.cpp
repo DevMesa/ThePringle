@@ -69,19 +69,10 @@ void Aimbot::GetPlayers(const AimbotEvents::GetTargets& msg)
 		if (!unit)
 			continue;
 
-		QAngle null_viewang = QAngle(Quaternion::Identity());
-		AimbotEvents::Target::Info info(
-			/*Velocity =*/ reinterpret_cast<Vector&>(unit->Velocity),
-			/*ShootDirection =*/ reinterpret_cast<Vector&>(unit->Forward),
-			/*ViewAngles =*/ null_viewang,
-			/*Team =*/ it->Properties.TeamIndex,
-			/*UnitIndex =*/ unitObjectIndex,
-			/*Alive =*/ !it->DeadSlaveUnit,
-			/*Player =*/ true
-		);
-		
 		Vector pos;
-		
+		Vector& vel = reinterpret_cast<Vector&>(unit->Velocity);
+		Vector& shoot_dir = reinterpret_cast<Vector&>(unit->Forward);
+
 		switch (msg.AimAt)
 		{
 		default:
@@ -90,14 +81,26 @@ void Aimbot::GetPlayers(const AimbotEvents::GetTargets& msg)
 			break;
 		case AimbotEvents::AimPosition::Head:
 			Unit_GetHeadPosition(unitObjectIndex, &pos);
-			pos += info.ShootDirection * 0.05f; // forward ness for the head pos
-			pos += info.ShootDirection.Right() * 0.05f;
+			pos += shoot_dir * 0.05f; // forward ness for the head pos
+			pos += shoot_dir.Right() * 0.05f;
 			pos += Vector::Down() * 0.01f;
 			break;
 		case AimbotEvents::AimPosition::Center:
 			pos = unit->Center;
 			break;
 		}
+
+		QAngle null_viewang = QAngle(Quaternion::Identity());
+		AimbotEvents::Target::Info info(
+			/*Velocity =*/ vel,
+			/*ShootDirection =*/ shoot_dir,
+			/*ViewAngles =*/ null_viewang,
+			/*OriginOffset =*/ pos - unit->Position,
+			/*Team =*/ it->Properties.TeamIndex,
+			/*UnitIndex =*/ unitObjectIndex,
+			/*Alive =*/ !it->DeadSlaveUnit,
+			/*Player =*/ true
+		);
 
 		msg.GotTarget(AimbotEvents::Target(pos, info));
 	}
@@ -220,6 +223,7 @@ void Aimbot::OnTick(const PostTick& msg)
 		/*Velocity =*/ reinterpret_cast<Vector&>(localplayerunit->Velocity),
 		/*ShootDirection =*/ shootdir,
 		/*ViewAngles =*/ null_viewang,
+		/*OriginOffset =*/ shootpos - localplayerunit->Position,
 		/*Team =*/ localplayer->Properties.TeamIndex,
 		/*UnitIndex =*/ localplayer->SlaveUnit.Handle,
 		/*Alive =*/ !localplayer->DeadSlaveUnit,
@@ -232,6 +236,7 @@ void Aimbot::OnTick(const PostTick& msg)
 		Vector best_pos;
 		int best_unitindex = 0;
 		float best_score = std::numeric_limits<float>::epsilon(); // the lowest score we will accept
+		bool best_disableautoshoot = false;
 		bool best_got = false;
 
 		AimbotEvents::AimPosition::Enum aimpos = AimbotEvents::AimPosition::Origin;
@@ -245,14 +250,15 @@ void Aimbot::OnTick(const PostTick& msg)
 
 		Hook::Call<AimbotEvents::GetTargets>([&](const AimbotEvents::Target& targ) -> void
 		{
-			float score = 0;
-			Hook::Call<AimbotEvents::ScoreTarget>(self, targ, score);
+			AimbotEvents::ScoreTarget e(self, targ);
+			Hook::CallPremade<AimbotEvents::ScoreTarget>(e);
 
-			if (score > best_score)
+			if (e.Importance > best_score)
 			{
-				best_score = score;
+				best_score = e.Importance;
 				best_pos = targ.Position;
 				best_unitindex = targ.Information.UnitIndex;
+				best_disableautoshoot = e.DisableAutoshoot;
 				best_got = true;
 			}
 		}, aimpos);
@@ -272,7 +278,7 @@ void Aimbot::OnTick(const PostTick& msg)
 				this->LastTargetPosition = copy;
 
 				// shoot is here so we use the non-laggy position for shooting
-				this->Shoot = this->AutoShoot->ValueInt != 0;
+				this->Shoot = this->AutoShoot->ValueInt != 0 && !best_disableautoshoot;
 			}
 			else
 			{
