@@ -594,7 +594,7 @@
       <Filter>ThePringle</Filter>
     </ClCompile>
     <ClCompile Include="Source\ThePringle\FontManager.cpp">
-	  <Filter>ThePringle</Filter>
+      <Filter>ThePringle</Filter>
     </ClCompile>
     <ClCompile Include="Source\ThePringle\NoRender.cpp">
       <Filter>ThePringle</Filter>
@@ -1351,10 +1351,10 @@
       <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\HookEvents.hpp">
-	  <Filter>ThePringle</Filter>
+      <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\Quaternion.hpp">
-	  <Filter>ThePringle</Filter>
+      <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\Halo\Halo.hpp">
       <Filter>ThePringle\Halo</Filter>
@@ -1366,7 +1366,7 @@
       <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\FontManager.hpp">
-	  <Filter>ThePringle</Filter>
+      <Filter>ThePringle</Filter>
     </ClInclude>
     <ClInclude Include="Source\ThePringle\NoRender.hpp">
       <Filter>ThePringle</Filter>
@@ -1374,11 +1374,17 @@
     <ClInclude Include="Source\ThePringle\Projectiles.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
+    <ClInclude Include="Source\ThePringle\Halo\Wrapper.hpp">
+      <Filter>ThePringle\Halo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Source\ElDorito.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\ElDorito.def" />
+    <None Include="Source\ThePringle\Halo\Wrapper.md">
+      <Filter>ThePringle\Halo</Filter>
+    </None>
   </ItemGroup>
 </Project>

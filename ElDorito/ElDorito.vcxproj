@@ -365,6 +365,7 @@
     <ClInclude Include="Source\ThePringle\EulerAngle.hpp" />
     <ClInclude Include="Source\ThePringle\FontManager.hpp" />
     <ClInclude Include="Source\ThePringle\Halo\Halo.hpp" />
+    <ClInclude Include="Source\ThePringle\Halo\Wrapper.hpp" />
     <ClInclude Include="Source\ThePringle\HookEvents.hpp" />
     <ClInclude Include="Source\ThePringle\Hooks.hpp" />
     <ClInclude Include="Source\ThePringle\NoclipHack.hpp" />
@@ -454,6 +455,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\ElDorito.def" />
+    <None Include="Source\ThePringle\Halo\Wrapper.md" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Source\ElDorito.rc" />
