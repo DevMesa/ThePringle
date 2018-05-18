@@ -136,7 +136,7 @@ namespace Pringle
 
 		auto equipped_weapon_object_index = object(0x2D0 + 4 * equipped_weapon_index).Read<uint32_t>();
 		auto equipped_weapon_object_ptr = Pointer(Blam::Objects::GetObjects()[equipped_weapon_object_index].Data);
-		if (!equipped_weapon_object_ptr)
+		if (!equipped_weapon_object_ptr || (intptr_t)equipped_weapon_object_ptr == 0xBABABABA) // babab.. is when in a car..
 			return weapon;
 
 		auto obj = Blam::Objects::Get(datum->SlaveUnit.Handle);
