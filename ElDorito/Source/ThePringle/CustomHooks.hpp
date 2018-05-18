@@ -13,6 +13,11 @@ namespace Pringle
 		{
 			void Initialize(LPDIRECT3DDEVICE9 device);
 		}
+
+		namespace Halo
+		{
+			void Initialize();
+		}
 	}
 }
 
