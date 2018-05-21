@@ -363,6 +363,7 @@
     <ClInclude Include="Source\Settings.hpp" />
     <ClInclude Include="Source\ThePringle\Chams.hpp" />
     <ClInclude Include="Source\ThePringle\CustomHooks.hpp" />
+    <ClInclude Include="Source\ThePringle\D3DShaderDebugger.hpp" />
     <ClInclude Include="Source\ThePringle\Draw.hpp" />
     <ClInclude Include="Source\ThePringle\ESP.hpp" />
     <ClInclude Include="Source\ThePringle\Aimbot.hpp" />

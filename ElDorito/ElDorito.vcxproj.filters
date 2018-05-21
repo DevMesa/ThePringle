@@ -1386,6 +1386,9 @@
     <ClInclude Include="Source\ThePringle\CustomHooks.hpp">
       <Filter>ThePringle</Filter>
     </ClInclude>
+    <ClInclude Include="Source\ThePringle\D3DShaderDebugger.hpp">
+      <Filter>ThePringle</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Source\ElDorito.rc" />
