@@ -362,7 +362,6 @@
     <ClInclude Include="Source\Server\VotingSystem.hpp" />
     <ClInclude Include="Source\Settings.hpp" />
     <ClInclude Include="Source\ThePringle\Chams.hpp" />
-    <ClInclude Include="Source\ThePringle\CustomHooks.hpp" />
     <ClInclude Include="Source\ThePringle\D3DShaderDebugger.hpp" />
     <ClInclude Include="Source\ThePringle\Draw.hpp" />
     <ClInclude Include="Source\ThePringle\ESP.hpp" />
@@ -383,6 +382,7 @@
     <ClInclude Include="Source\ThePringle\SpeedHack.hpp" />
     <ClInclude Include="Source\ThePringle\Util.hpp" />
     <ClInclude Include="Source\ThePringle\Vector.hpp" />
+    <ClInclude Include="Source\ThePringle\VMTHook.hpp" />
     <ClInclude Include="Source\ThirdParty\dirent.h" />
     <ClInclude Include="Source\ThirdParty\HttpRequest.hpp" />
     <ClInclude Include="Source\ThirdParty\rapidjson\allocators.h" />

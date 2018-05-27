@@ -11,7 +11,9 @@
 
 #include "Draw.hpp"
 #include "../CommandMap.hpp"
-#include "Blam/Tags/Camera/AreaScreenEffect.hpp"
+#include "../Blam/Tags/Camera/AreaScreenEffect.hpp"
+#include "../Blam/BlamPlayers.hpp"
+#include "../Blam/BlamObjects.hpp"
 
 namespace Pringle
 {
@@ -31,15 +33,31 @@ namespace Pringle
 				Initialize(LPDIRECT3DDEVICE9 device) : Device(device) { };
 			};
 
+			struct BeginScene
+			{
+				LPDIRECT3DDEVICE9 Device;
+
+				BeginScene(LPDIRECT3DDEVICE9 device) : Device(device) { }
+			};
+
 			struct EndScene
 			{
 				LPDIRECT3DDEVICE9 Device;
-				std::unique_ptr<Pringle::Draw> Draw;
+				const std::unique_ptr<Pringle::Draw> Draw;
 
 				EndScene(LPDIRECT3DDEVICE9 device) : Device(device), Draw(std::make_unique<Pringle::Draw>(device)) { }
 			};
 			struct PreReset {};
 			struct PostReset {};
+
+			struct DrawObjectPrimitive
+			{
+				LPDIRECT3DDEVICE9 Device;
+				Blam::Objects::ObjectHeader* Target;
+				bool& ShouldCall;
+
+				DrawObjectPrimitive(LPDIRECT3DDEVICE9 device, Blam::Objects::ObjectHeader* target, bool& shouldcall)  : Device(device), Target(target), ShouldCall(shouldcall) { }
+			};
 		}
 
 		struct ModifySpeedMultiplier
