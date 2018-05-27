@@ -138,9 +138,9 @@ namespace Pringle
 
 		for (auto it = this->players.begin(); it != this->players.end(); ++it)
 		{
-			auto info = *it;
+			auto& info = *it;
 
-			auto unit = info.Data;
+			auto& unit = info.Data;
 
 			uint32_t color;
 			if (info.Player.Properties.TeamIndex == teamIndex)

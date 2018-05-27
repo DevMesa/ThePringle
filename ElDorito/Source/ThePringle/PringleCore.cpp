@@ -7,6 +7,7 @@
 #include "NoclipHack.hpp"
 #include "FontManager.hpp"
 #include "NoRender.hpp"
+#include "Chams.hpp"
 
 #include "../Console.hpp"
 #include "../Patch.hpp"
@@ -54,5 +55,6 @@ namespace Pringle
 		ServiceTagMod::Instance();
 		NoclipHack::Instance();
 		NoRenderMod::Instance();
+		Chams::Instance();
 	}
 }
