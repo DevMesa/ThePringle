@@ -197,10 +197,13 @@ namespace
 	typedef long(__stdcall* BeginScene_t)(void*);
 	typedef long(__stdcall* DrawIndexedPrimitive_t)(void*, int, int, unsigned int, unsigned int, unsigned int, unsigned int);
 	typedef bool(__cdecl* RenderSegment_t)(RenderHeader*, int);
+	typedef void(*VoidFunction_t)(void);
 
 	auto BeginScene_ptr = reinterpret_cast<BeginScene_t>(0x00);
 	auto DrawIndexedPrimitive_ptr = reinterpret_cast<DrawIndexedPrimitive_t>(0x00);
 	auto RenderSegment_ptr = reinterpret_cast<RenderSegment_t>(0xA78940);
+	auto sub_B36510_ptr = reinterpret_cast<VoidFunction_t>(0xB36510);
+	auto sub_B69AD0_ptr = reinterpret_cast<VoidFunction_t>(0xB69AD0);
 
 	HRESULT __stdcall BeginScene_hook(LPDIRECT3DDEVICE9 device)
 	{
@@ -242,6 +245,24 @@ namespace
 		}
 		return RenderSegment_ptr(header, type);
 	}
+
+	void sub_B36510_hook() // unused
+	{
+		Pringle::Hook::Call<Pringle::Hooks::PreTick>();
+
+		sub_B36510_ptr();
+
+		Pringle::Hook::Call<Pringle::Hooks::PostTick>();
+	}
+
+	void sub_B69AD0_hook()
+	{
+		Pringle::Hook::Call<Pringle::Hooks::PreTick>();
+
+		sub_B69AD0_ptr();
+
+		Pringle::Hook::Call<Pringle::Hooks::PostTick>();
+	}
 }
 
 class HookInitializer
@@ -253,6 +274,8 @@ public:
 		DetourUpdateThread(GetCurrentThread());
 		DetourAttach(reinterpret_cast<void**>(&RenderSegment_ptr), &RenderSegment_hook);
 		DetourTransactionCommit();
+
+		::Hook(0xB365F4 - 0x400000, sub_B69AD0_hook, HookFlags::IsCall).Apply();
 
 		Pringle::Hook::SubscribeMember<Pringle::Hooks::DirectX::Initialize>(this, &HookInitializer::OnInitialize);
 	}
