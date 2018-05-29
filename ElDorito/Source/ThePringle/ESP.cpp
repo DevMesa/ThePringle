@@ -1,4 +1,5 @@
 #include "ESP.hpp"
+#include "Aimbot.hpp"
 #include "Draw.hpp"
 #include "Halo/Halo.hpp"
 #include "../ElDorito.hpp"
@@ -139,11 +140,12 @@ namespace Pringle
 		for (auto it = this->players.begin(); it != this->players.end(); ++it)
 		{
 			auto& info = *it;
-
 			auto& unit = info.Data;
 
 			uint32_t color;
-			if (info.Player.Properties.TeamIndex == teamIndex)
+			if (Aimbot::Instance().HasTarget && info.Player.SlaveUnit.Handle == Aimbot::Instance().LastTargetUnitIndex)
+				color = COLOR4I(255, 255, 255, 255);
+			else if (info.Player.Properties.TeamIndex == teamIndex)
 				color = info.Visible ? COLOR4I(0, 255, 0, 255) : COLOR4I(0, 0, 255, 255);
 			else
 				color = info.Visible ? COLOR4I(255, 0, 0, 255) : COLOR4I(255, 128, 40, 255);
