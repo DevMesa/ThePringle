@@ -20,11 +20,28 @@ using namespace Pringle;
 using namespace Pringle::Hooks;
 using namespace Modules;
 
-const static auto Unit_GetHeadPosition = (void(__cdecl*)(uint32_t unitObjectIndex, Vector* position))(0x00B439D0);
+namespace
+{
+	const static auto Unit_GetHeadPosition = (void(__cdecl*)(uint32_t unitObjectIndex, Vector* position))(0x00B439D0);
+
+	// set the boolean when the scope is exited
+	class AtomicBool
+	{
+		bool& For;
+	public:
+		bool To;
+		AtomicBool(bool& vfor, bool to = false) : For(vfor), To(to) { }
+		~AtomicBool()
+		{
+			For = To;
+		}
+	};
+}
 
 Aimbot::Aimbot() : ModuleBase("Pringle")
 {
 	this->Enabled = this->AddVariableInt("Aimbot.Enabled", "aimbot.enabled", "Enable the hack", eCommandFlagsArchived, 0);
+	this->Passive = this->AddVariableInt("Aimbot.Passive", "aimbot.passive", "Passively scan for targets, even if not enabled", eCommandFlagsArchived, 1);
 	this->AutoShoot = this->AddVariableInt("Aimbot.AutoShoot", "aimbot.autoshoot", "Enable autoshooting", eCommandFlagsArchived, 1);
 	this->X = this->AddVariableInt("Aimbot.X", "aimbot.x", "Enable the hack", eCommandFlagsArchived, 0);
 	this->Y = this->AddVariableFloat("Aimbot.Y", "aimbot.y", "Enable the hack", eCommandFlagsArchived, 0);
@@ -38,6 +55,10 @@ Aimbot::Aimbot() : ModuleBase("Pringle")
 	this->AliveImportance = this->AddVariableFloat("Aimbot.Importance.Alive", "aimbot.importance.alive", "Importance of them being alive", eCommandFlagsArchived, 1.0f);
 	this->TeamImportance = this->AddVariableFloat("Aimbot.Importance.Team", "aimbot.importance.team", "Importance of them being on a different team", eCommandFlagsArchived, 1.0f);
 	this->VisibleImportance = this->AddVariableFloat("Aimbot.Importance.Visible", "aimbot.importance.visible", "Importance of them being visible.", eCommandFlagsArchived, 1.0f);
+	this->HoldTargetImportance = this->AddVariableFloat("Aimbot.Importance.HoldTarget", "aimbot.importance.holdtarget", "Continue aiming at target until it is no longer valid", eCommandFlagsArchived, 1.f);
+	this->FOVImportance = this->AddVariableFloat("Aimbot.Importance.FOV", "aimbot.importance.fov", "Importance of aiming at target within the FOV", eCommandFlagsArchived, 1.f);
+
+	this->FOV = this->AddVariableFloat("Aimbot.FOV", "aimbot.fov", "Aimbot field of view", eCommandFlagsArchived, 180.f);
 
 	Hook::SubscribeMember<PostTick>(this, &Aimbot::OnTick);
 	Hook::SubscribeMember<PreLocalPlayerInput>(this, &Aimbot::OnPreLocalPlayerInput);
@@ -47,6 +68,8 @@ Aimbot::Aimbot() : ModuleBase("Pringle")
 	Hook::SubscribeMember<AimbotEvents::ScoreTarget>(this, &Aimbot::ScoreAlive);
 	Hook::SubscribeMember<AimbotEvents::ScoreTarget>(this, &Aimbot::ScoreTeam);
 	Hook::SubscribeMember<AimbotEvents::ScoreTarget>(this, &Aimbot::ScoreVisible);
+	Hook::SubscribeMember<AimbotEvents::ScoreTarget>(this, &Aimbot::ScoreHoldPreviousTarget);
+	Hook::SubscribeMember<AimbotEvents::ScoreTarget>(this, &Aimbot::ScoreFOV);
 }
 
 void Aimbot::GetPlayers(const AimbotEvents::GetTargets& msg)
@@ -161,6 +184,30 @@ void Pringle::Aimbot::ScoreVisible(const AimbotEvents::ScoreTarget& msg)
 			this->VisibleImportance->ValueFloat);
 }
 
+void Pringle::Aimbot::ScoreHoldPreviousTarget(const AimbotEvents::ScoreTarget& msg)
+{
+	if (this->Enabled->ValueInt == 0 || this->LastTargetUnitIndex == 0) // don't influence the score if we don't have a last target or we are passively looking for targets
+		return;
+
+	msg.Importance *=
+		AimbotEvents::ScoreTarget::Calculate(
+			this->LastTargetUnitIndex == msg.What.Information.UnitIndex ? 1.0f : 0.0f,
+			this->HoldTargetImportance->ValueFloat);
+}
+
+void Pringle::Aimbot::ScoreFOV(const AimbotEvents::ScoreTarget& msg)
+{
+	auto& angle = (msg.What.Position - msg.Self.Position).Angles();
+	auto& selfang = msg.Self.Information.ShootDirection.Angles();
+	auto pitch = std::abs(std::clamp(selfang.Pitch.AsDegrees() - angle.Pitch.AsDegrees(), -180.f, 180.f));
+	auto yaw = std::abs(std::clamp(selfang.Yaw.AsDegrees() - angle.Yaw.AsDegrees(), -180.f, 180.f));
+
+	msg.Importance *=
+		AimbotEvents::ScoreTarget::Calculate(
+			(pitch < this->FOV->ValueFloat && yaw < this->FOV->ValueFloat) ? 1.0f : 0.0f,
+			this->FOVImportance->ValueFloat);
+}
+
 static double Scale(double x, double from_min, double from_max, double to_min, double to_max)
 {
 	double from_diff = from_max - from_min;
@@ -172,8 +219,10 @@ static double Scale(double x, double from_min, double from_max, double to_min, d
 
 void Aimbot::OnTick(const PostTick& msg)
 {
+	AtomicBool guard(this->HasTarget, false);
 	this->Shoot = false;
-	if (this->Enabled->ValueInt == 0)
+
+	if (this->Enabled->ValueInt == 0 && this->Passive->ValueInt == 0)
 	{
 		this->LastSelfPositionFresh = false;
 		this->LastTargetUnitIndex = 0;
@@ -269,6 +318,8 @@ void Aimbot::OnTick(const PostTick& msg)
 			return;
 		}
 		
+		bool _shoot = false;
+
 		// delta positions
 		{
 			if (best_unitindex == this->LastTargetUnitIndex)
@@ -278,7 +329,7 @@ void Aimbot::OnTick(const PostTick& msg)
 				this->LastTargetPosition = copy;
 
 				// shoot is here so we use the non-laggy position for shooting
-				this->Shoot = this->AutoShoot->ValueInt != 0 && !best_disableautoshoot;
+				_shoot = this->AutoShoot->ValueInt != 0 && !best_disableautoshoot;
 			}
 			else
 			{
@@ -287,11 +338,18 @@ void Aimbot::OnTick(const PostTick& msg)
 			}
 		}
 
+		guard.To = true;
+
+		if (this->Enabled->ValueInt == 0) // passively scanning for targets
+			return;
+
 		Vector dir = (best_pos - shootpos).Normal();
 		EulerAngles ang = dir.Angles();
 
 		pitchptr.WriteFast(ang.Pitch.AsRadians());
 		yawptr.WriteFast(ang.Yaw.AsRadians());
+
+		this->Shoot = _shoot;
 	}
 }
 

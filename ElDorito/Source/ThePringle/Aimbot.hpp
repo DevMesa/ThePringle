@@ -17,15 +17,17 @@ namespace Pringle
 	public:
 		Aimbot();
 
+		bool HasTarget = false;
+		uint32_t LastTargetUnitIndex = 0;
 	protected:
 		Vector LastSelfPosition;
 		Vector LastTargetPosition;
-		int LastTargetUnitIndex;
 		bool LastSelfPositionFresh;
 		bool Shoot;
 		bool ShotLast;
 
 		Modules::Command* Enabled;
+		Modules::Command* Passive;
 		Modules::Command* AutoShoot;
 		Modules::Command* X;
 		Modules::Command* Y;
@@ -40,6 +42,10 @@ namespace Pringle
 		Modules::Command* AliveImportance;
 		Modules::Command* TeamImportance;
 		Modules::Command* VisibleImportance;
+		Modules::Command* HoldTargetImportance;
+		Modules::Command* FOVImportance;
+
+		Modules::Command* FOV;
 
 		void OnTick(const Hooks::PostTick& msg);
 		void OnPreLocalPlayerInput(const Hooks::PreLocalPlayerInput& msg);
@@ -50,6 +56,8 @@ namespace Pringle
 		void ScoreAlive(const Hooks::AimbotEvents::ScoreTarget& msg);
 		void ScoreTeam(const Hooks::AimbotEvents::ScoreTarget& msg);
 		void ScoreVisible(const Hooks::AimbotEvents::ScoreTarget& msg);
+		void ScoreHoldPreviousTarget(const Hooks::AimbotEvents::ScoreTarget& msg);
+		void ScoreFOV(const Hooks::AimbotEvents::ScoreTarget& msg);
 	};
 }
 
