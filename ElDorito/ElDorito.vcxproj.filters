@@ -605,6 +605,9 @@
     <ClCompile Include="Source\ThePringle\Projectiles.cpp">
       <Filter>ThePringle</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ThePringle\Halo\Wrapper.cpp">
+      <Filter>ThePringle\Halo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Blam\BitStream.hpp">

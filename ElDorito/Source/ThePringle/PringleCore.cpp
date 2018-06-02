@@ -12,6 +12,8 @@
 #include "../Patch.hpp"
 
 
+#include "Halo/Wrapper.hpp"
+
 void TickHook()
 {
 	Pringle::Hook::Call<Pringle::Hooks::PreTick>();
@@ -23,7 +25,6 @@ void TickHook()
 }
 
 //B365F4
-
 void TickHook2()
 {
 	Pringle::Hook::Call<Pringle::Hooks::PreTick>();
@@ -31,9 +32,10 @@ void TickHook2()
 	auto sub_B69AD0 = reinterpret_cast<void(*)()>(0xB69AD0);
 	sub_B69AD0();
 
+	Pringle::WrapperUpdate();
+
 	Pringle::Hook::Call<Pringle::Hooks::PostTick>();
 }
-
 
 void SetupTickHook()
 {

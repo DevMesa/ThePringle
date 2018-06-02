@@ -21,6 +21,8 @@ private:
 
 public:
 	static const std::vector<std::shared_ptr<Entity>>& GetAll();
+	template<typename T>
+	static const std::vector<std::shared_ptr<Entity>>& GetAll();
 };
 ```
 
@@ -51,10 +53,10 @@ tho I might add `Entity::ClearAllExtensions<T>()` if desired.
 #### Example
 
 ```c++
-std::shared_ptr<Player> pl = Players::GetAll()[0];
+std::shared_ptr<Entity> pl = Entities::GetAll<Player>()[0];
 
 Friend& ext = pl->Extension<Friend>();
-ext.IsFriend = pl->Name == "xyz";
+ext.IsFriend = pl->Extension<Player>().Name == "xyz";
 ```
 
 #### Possible Extensions
