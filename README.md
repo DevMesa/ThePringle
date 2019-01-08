@@ -80,7 +80,7 @@ We can then add the line:
 Pringle::Hook::Call<Pringle::Hooks::ModifySpeedMultiplier>(scale);
 ```
 
-To just below where the scale is initialized. Due to a reference to the scale being passed (in the member variable `Speed`, the hack side code can subscribe to the `ModifySpeedMultiplier` event, and mutate the Speed variable to control it in an extensible way, as such:
+To just below where the scale is initialized. Due to a reference to the scale being passed (in the member variable `Speed`), the hack side code can subscribe to the `ModifySpeedMultiplier` event, and mutate the Speed variable to control it in an extensible way, as such:
 
 ```c++
 Hook::SubscribeMember<ModifySpeedMultiplier>(this, &SpeedHack::OnModifySpeedMultiplier);
@@ -92,4 +92,4 @@ void SpeedHack::OnModifySpeedMultiplier(const ModifySpeedMultiplier & msg)
 }
 ```
 
-Note how the logic is done hack side and not game side, with the change compounding (i.e. not overwriting) the existing value. This allows the functionality to be extended in many places, not just one place. For example, you could add jitter to the speed to make you harder to hit without changing the overall average running speed, while also still being compatible with the speedhack.
+Note how the logic is done hack side and not game side, with the change compounding (i.e. not overwriting) the existing value. This allows the functionality to be extended in many places, not just one place. For example, you could add jitter to the speed to make you harder to hit without changing the overall average running speed, while maintaining compatibility with the speedhack.
