@@ -1,32 +1,95 @@
-**ElDewrito development is on hold right now. We are not accepting issue reports or pull requests. For more information, please see our [blog](http://blog.eldewrito.com/).**
+# The Pringle
 
-<img src="http://i.imgur.com/IkTrjna.png" width="190" height="164" align="right"/>
+Halo 3 Online hack built on top of [ElDorito](https://github.com/ElDewrito/ElDorito).
 
-# ElDewrito
-[![Build status](https://ci.appveyor.com/api/projects/status/3y5603c0svd05hoy/branch/master?svg=true)](https://ci.appveyor.com/project/medsouz/eldorito/branch/master)
-[![Discord](https://img.shields.io/discord/84694847729963008.svg)](https://discord.gg/0TKY0SDEUHAWL4sG)
+The `hacked` branch contains the hacked code, the `master` branch has the upstream code that can be pulled and merged over into `hacked` on updates.
 
-## What is ElDewrito?
-ElDewrito is a fan mod for Halo Online that enables LAN-based online multiplayer across the globe, as well as many bug-fixes and enhancements. As there is no telling if any other Halo game will ever be brought to PC, Halo Online is the best thing we have, and fortunately it contains a lot of Halo 3 and Halo ODST content. ElDewrito aims to unlock and expand on this content.
+## Features
 
-Note that this is the source code repo for it, not the mod itself. You'll need a copy of Halo Online and the ElDewrito Launcher to install ED.
+ - Aimbot
+   - Projectile prediction with accurate time-to-impact and player position estimation/confidence by calculating derivatives
+ - Chams
+ - ESP
+ - Markers
+ - Service tag changing
+ - No fog
+ - Speed hack
+ - Air acceleration (flying)
+ - Easily extensible via hooks
 
-Pull requests are welcomed from anyone who wants to contribute to us. We recommend that you come talk to us on [Discord](https://discord.gg/0TKY0SDEUHAWL4sG) first before starting work on anything major, so that we can discuss it and come up with the best way to help you implement it. Also, please use Visual Studio to edit and test your code. Pull requests which were clearly made with GitHub's online editor will be rejected. Your commits should be meaningful and represent logical increments in functionality.
+## Credits
 
-## Download
-You should always check for the latest builds of ElDewrito on [AppVeyor](https://ci.appveyor.com/project/medsouz/eldorito/branch/master/artifacts) or our [subreddit](https://www.reddit.com/r/HaloOnline/).
+ - [C0BRA](https://github.com/AshleighAdams)
+ - [fr1kin](https://github.com/fr1kin)
+ - [Victormeriqui](https://github.com/Victormeriqui)
+ - [babbaj](https://github.com/babbaj)
+ - [0x22](https://github.com/0-x-2-2)
+ - [oremonger](https://github.com/oremonger)
 
-## Building
-To build ElDewrito you'll need Visual Studio 2017 installed with the Windows 8.1 SDK.
+## Videos
 
-## Donations
-We don't accept donations, donate money to your favorite charity instead.
+ - [Projectile prediction](https://www.youtube.com/watch?v=EcZkf2AP190)
+   - [Receiving end](https://www.youtube.com/watch?v=TGsBHE85F6Q)
+   - [Time to impact iteration demo 1](https://www.youtube.com/watch?v=xOa3K9HbOOY)
+   - [Time to impact iteration demo 2](https://www.youtube.com/watch?v=)
+ - [Aimbot, speedhack, and air acceleration](https://www.youtube.com/watch?v=DBBoimZ9wCQ)
+ - [Aimbotting and griffball trolling](https://www.youtube.com/watch?v=c6bW97Q75DE)
 
-Although if you have a spare server running [ElDewrito-MasterServer](https://github.com/ElDewrito/ElDewrito-MasterServer) on it would be welcomed, get in touch with us on IRC and we can help you set this up.
+## Setup
 
-## Help/Support/Contact
-We have a [Discord server](https://discord.gg/0TKY0SDEUHAWL4sG) that stays pretty active with helpful users.
+Copy the fully patched and updated `ElDorito` runtime to `./HaloOnline/`, open the solution, and set ElDorito as the startup project, along with the following configuration options set:
 
-You can also try checking the support question on the [subreddit](https://www.reddit.com/r/HaloOnline/).
+Option                    | Setting                  
+--------------------------|-------------------------
+*General*                 |
+Windows SDK Version       | 8.1
+Output Directory          | $(SolutionDir)HaloOnline\\
+Intermediate Directory    | $(ProjectDir)$(Configuration)\\
+Target Name               | mtndew
+Target Extension          | .dll
+Platform Toolset          | Visual Studio 2017 (v141)
+*Debugging*               |
+Command                   | $(SolutionDir)HaloOnline\eldorado.exe
+Working Directory         | $(ProjectDir)
 
-If you have issues you can get in touch with us on there, or make a bug report in our issue tracker and we'll look over it.
+The same can be done for CefProcess too, using `custom_menu.exe` instead of `mtndew.dll`.
+
+## Hacked Code
+
+To keep the hacked code all together, and to make it easy to merge upstream changes, hack implementations must live in `./ElDorito/Source/ThePringle/` and be fully namespaced, with code changes outside being:
+
+ - As minimal as possible.
+ - Hook where behavior can be implemented by subscribing to those hooks.
+ - Not changing program flow unless absolutely necessary.
+
+### Speedhack Example
+
+The function `Patches/PlayerScale.cpp:833: void BipedMovementPhysics(s_biped_physics_data1 *data, ...)` is responsible for moving and accelerating the physics object the local player controls. In this function, there is a local variable `scale`, that if modified, will adjust the speed the player runs at. We can then create the following struct with a reference to that scale as such:
+
+```c++
+struct ModifySpeedMultiplier
+{
+	float& Speed;
+	ModifySpeedMultiplier(float& speed) : Speed(speed) { }
+};
+```
+
+We can then add the line:
+
+```c++
+Pringle::Hook::Call<Pringle::Hooks::ModifySpeedMultiplier>(scale);
+```
+
+To just below where the scale is initialized. Due to a reference to the scale being passed (in the member variable `Speed`, the hack side code can subscribe to the `ModifySpeedMultiplier` event, and mutate the Speed variable to control it in an extensible way, as such:
+
+```c++
+Hook::SubscribeMember<ModifySpeedMultiplier>(this, &SpeedHack::OnModifySpeedMultiplier);
+// ...
+void SpeedHack::OnModifySpeedMultiplier(const ModifySpeedMultiplier & msg)
+{
+	if (this->Enabled->ValueInt != 0)
+		msg.Speed *= this->Factor->ValueFloat;
+}
+```
+
+Note how the logic is done hack side and not game side, with the change compounding (i.e. not overwriting) the existing value. This allows the functionality to be extended in many places, not just one place. For example, you could add jitter to the speed to make you harder to hit without changing the overall average running speed, while also still being compatible with the speedhack.
