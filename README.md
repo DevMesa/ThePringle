@@ -24,7 +24,7 @@ The `hacked` branch contains the hacked code, the `master` branch has the upstre
  - [Victormeriqui](https://github.com/Victormeriqui)
  - [babbaj](https://github.com/babbaj)
  - [0x22](https://github.com/0-x-2-2)
- - [oremonger](https://github.com/oremonger)
+ - [popbob](https://github.com/oremonger)
 
 ## Videos
 
